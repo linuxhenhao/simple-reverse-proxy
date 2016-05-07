@@ -30,6 +30,7 @@ import os
 import sys
 import socket
 from urlparse import urlparse
+import filter
 
 import tornado.httpserver
 import tornado.ioloop
@@ -95,7 +96,8 @@ class ProxyHandler(tornado.web.RequestHandler):
                 
                 if response.body:                   
                     self.set_header('Content-Length', len(response.body))
-                    self.write(response.body)
+                    response_body=filter.filt_content(self.request.uri,response.body)
+                    self.write(response_body)
             self.finish()
 
         body = self.request.body
