@@ -225,7 +225,7 @@ def run_proxy(port, config_file_path,start_ioloop=True):
         ioloop.start()
 
 if __name__ == '__main__':
-    port = 8888
+    port = 8000
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
 
