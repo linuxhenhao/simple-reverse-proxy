@@ -130,9 +130,7 @@ class ProxyHandler(tornado.web.RequestHandler):
         try:
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
-            print self.request
             self.request.host=redirect_before_fetch(self.request.host)
-            print self.request
             fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
@@ -225,7 +223,7 @@ def run_proxy(port, config_file_path,start_ioloop=True):
         ioloop.start()
 
 if __name__ == '__main__':
-    port = 8000
+    port = 8888
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
 

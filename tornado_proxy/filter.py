@@ -5,7 +5,8 @@ import re
 from bs4 import BeautifulSoup
 
 def filt_content(url,responsebody,url_prefix,scihub_host):
-    if(url.find(url_prefix)!=-1): # scholar's prefix found
+    pattern=re.compile(url_prefix)
+    if(pattern.match(url)!=None): # scholar's prefix found
         soup=BeautifulSoup(responsebody,"html.parser")
         answer_list=soup.findAll(attrs={"class":"gs_ri"})
         if(len(answer_list)==0): #no gs_ri,no available resources
