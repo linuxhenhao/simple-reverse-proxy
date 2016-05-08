@@ -31,7 +31,7 @@ import sys
 import socket
 from urlparse import urlparse
 import filter,re
-from ConfigParser import RawConfigParser
+from MyConfigParser import RawConfigParser
 
 import tornado.httpserver
 import tornado.ioloop
@@ -112,26 +112,12 @@ class ProxyHandler(tornado.web.RequestHandler):
                     self.write(response_body)
             self.finish()
 
-        def redirect_before_fetch(url):
-#rediret using the rules defined in site.conf file
-            pattern=re.compile("(https?://)([^/]+)")
-            match_result=pattern.match(url)
-
-            if(match_result==None): #url wrong format,return url
-                return url
-            splited_match=match_result.groups()
-            host=splited_match[1] #the host is at groups (https?://,host,...)
+        def redirect_before_fetch(host):
             if(self.parser.has_option('redirect',host)): #this url is in redirect rules
-                to_host=self.parser.get('redirect',host)
-                re_url=splited_match[0]+to_host
-#to detect if the url has more get info
-                matched_len=len(match_result.group())
-                if(matched_len<len(url)): #url is like https?://host/lfdjklsajfdklsajlk
-                    tail=url[matched_len:]
-                re_url+=tail
-                return re_url
-            else: #Not in redirect rules
-                return url
+                to_host = self.parser.get('redirect',host)
+                self.request.headers['Host']=to_host
+                return to_host
+            return host
 
         body = self.request.body
         if not body:
@@ -139,7 +125,9 @@ class ProxyHandler(tornado.web.RequestHandler):
         try:
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
-            self.request.uri=redirect_before_fetch(self.request.uri)
+            print self.request
+            self.request.host=redirect_before_fetch(self.request.host)
+            print self.request
             fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,

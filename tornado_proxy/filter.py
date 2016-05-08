@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 # filters to modify the http headers and response body
-import ConfigParser,re
+import re
 from bs4 import BeautifulSoup
 
 def filt_content(url,responsebody,url_prefix,scihub_host):
