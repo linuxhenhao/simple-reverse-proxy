@@ -3,6 +3,8 @@
 # filters to modify the http headers and response body
 import re
 from bs4 import BeautifulSoup
+filter_regexs=['https?://g\.sci-hub\.tk.*/scholar',\
+        'https?://sci\.ald-lab\.tk']
 
 def filt_content(url,responsebody,url_prefix,scihub_host):
     pattern=re.compile(url_prefix)

@@ -100,7 +100,7 @@ server {
 #
 	subs_filter_types text/html text/css text/xml;
 	subs_filter scihub2266oqcxt.onion sci.ald-lab.tk;
-    subs_filter http://([^s]\w+).onion http://$1.onion.to ir;
+    subs_filter http://([^s]\w+).onion http://cyber.sci-hub.tk ir;
 	subs_filter "#reload {"  "#reload {display:none;";
 	subs_filter "#save {"  "#save {display:none;";
 	subs_filter "#donate {"  "#donate {display:none;";
@@ -110,6 +110,21 @@ server {
 	}
 }
 
+server {
+    listen 82;
+
+    server_name cyber.sci-hub.tk;
+
+    location / {
+    
+    proxy_set_header Host cyber.sci-hub.bz;
+    proxy_pass http://104.28.21.155;
+    proxy_redirect http://cyber.sci-hub.tk /;
+
+    subs_filter_types text/html text/css text/xml
+    subs_filter cyber.sci-hub.bz cyber.sci-hub.tk;
+    }
+}
 #for google scholar
 server {
 	listen 82;
