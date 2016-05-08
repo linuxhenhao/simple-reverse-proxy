@@ -120,7 +120,7 @@ server {
     proxy_set_header Host cyber.sci-hub.bz;
     proxy_pass http://104.28.21.155;
     proxy_redirect http://cyber.sci-hub.tk /;
-
+# https://osge7iuzcrtmcsny.onion is the onion host name,more reliable than .bz domain
     subs_filter_types text/html text/css text/xml
     subs_filter cyber.sci-hub.bz cyber.sci-hub.tk;
     }
