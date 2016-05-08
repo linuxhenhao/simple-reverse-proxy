@@ -30,7 +30,8 @@ import os
 import sys
 import socket
 from urlparse import urlparse
-import filter
+import filter,re
+from ConfigParser import RawConfigParser
 
 import tornado.httpserver
 import tornado.ioloop
@@ -72,7 +73,18 @@ def fetch_request(url, callback, **kwargs):
 
 class ProxyHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET', 'POST', 'CONNECT']
-    
+
+    #@tornado.web.RequestHandler.initialize
+#add custom config to this class
+#add config=file_path to handler
+    def initialize(self,config):
+        ProxyHandler.config_file=config
+        ProxyHandler.parser=RawConfigParser()
+        ProxyHandler.parser.read(self.config_file)
+
+        ProxyHandler.url_prefix=ProxyHandler.parser.get('scholar','scholar_site_url_prefix')
+        ProxyHandler.scihub_host=ProxyHandler.parser.get('scholar','scholar_content_host')
+
     def compute_etag(self):
         return None # disable tornado Etag
 
@@ -89,23 +101,45 @@ class ProxyHandler(tornado.web.RequestHandler):
             else:
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
-                
+
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
-                
-                if response.body:                   
-                    self.set_header('Content-Length', len(response.body))
-                    response_body=filter.filt_content(self.request.uri,response.body)
+
+                if response.body:
+                    response_body=filter.filt_content(self.request.uri,response.body,ProxyHandler.url_prefix,ProxyHandler.scihub_host)
+                    self.set_header('Content-Length', len(response_body))
                     self.write(response_body)
             self.finish()
+
+        def redirect_before_fetch(url):
+#rediret using the rules defined in site.conf file
+            pattern=re.compile("(https?://)([^/]+)")
+            match_result=pattern.match(url)
+
+            if(match_result==None): #url wrong format,return url
+                return url
+            splited_match=match_result.groups()
+            host=splited_match[1] #the host is at groups (https?://,host,...)
+            if(self.parser.has_option('redirect',host)): #this url is in redirect rules
+                to_host=self.parser.get('redirect',host)
+                re_url=splited_match[0]+to_host
+#to detect if the url has more get info
+                matched_len=len(match_result.group())
+                if(matched_len<len(url)): #url is like https?://host/lfdjklsajfdklsajlk
+                    tail=url[matched_len:]
+                re_url+=tail
+                return re_url
+            else: #Not in redirect rules
+                return url
 
         body = self.request.body
         if not body:
             body = None
         try:
             if 'Proxy-Connection' in self.request.headers:
-                del self.request.headers['Proxy-Connection'] 
+                del self.request.headers['Proxy-Connection']
+            self.request.uri=redirect_before_fetch(self.request.uri)
             fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
@@ -184,13 +218,13 @@ class ProxyHandler(tornado.web.RequestHandler):
             upstream.connect((host, int(port)), start_tunnel)
 
 
-def run_proxy(port, start_ioloop=True):
+def run_proxy(port, config_file_path,start_ioloop=True):
     """
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
     """
     app = tornado.web.Application([
-        (r'.*', ProxyHandler),
+        (r'.*', ProxyHandler,dict(config=config_file_path)),
     ])
     app.listen(port)
     ioloop = tornado.ioloop.IOLoop.instance()
@@ -203,4 +237,4 @@ if __name__ == '__main__':
         port = int(sys.argv[1])
 
     print ("Starting HTTP proxy on port %d" % port)
-    run_proxy(port)
+    run_proxy(port,"./site.conf")
