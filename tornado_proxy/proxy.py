@@ -118,11 +118,13 @@ class ProxyHandler(tornado.web.RequestHandler):
             #deal with self.request.uri
                 host_pattern=re.compile("(https?://)([^/]+)")
                 match_result=host_pattern.match(self.request.uri)
+
+                tail=self.request.uri[len(match_result.group()):]
                 if(match_result==None): #no host info in uri,add it
-                    self.request.uri=self.request.protocol+"://"+to_host+self.request.uri
+                    self.request.uri=self.request.protocol+"://"+to_host+tail
+
+                self.request.host=to_host
                 self.request.headers['Host']=to_host
-                return to_host
-            return host
 
         body = self.request.body
         if not body:
@@ -130,7 +132,16 @@ class ProxyHandler(tornado.web.RequestHandler):
         try:
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
-            self.request.host=redirect_before_fetch(self.request.host)
+
+# complete all the uri from "GET /xxx" to "GET https?://host/xxx"
+            host_pattern=re.compile("(https?://)([^/]+)")
+            match_result=host_pattern.match(self.request.uri)
+            if(match_result==None): #no host info in uri,add it
+                self.request.uri=self.request.protocol+"://"+self.request.host+self.request.uri
+
+#do redirect before fetch request
+            redirect_before_fetch(self.request.host)
+
             fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
