@@ -76,13 +76,13 @@ server {
 	listen 82;
 	listen [::]:82;
 
-	server_name sci.ald-lab.tk *.sci.ald-lab.tk;
+	server_name sci.ald-lab.tk *.sci.ald-lab.tk sci.yageservice.com;
 
 	root /var/www/example.com;
 	index index.html;
 
 	location / {
-	if ( $host ~* (.*)sci.ald-lab\.tk )
+	if ( $host ~* (.*)sci\.yageservice\.com )
 		{
 			set $myhost $1scihub2266oqcxt.onion;	
 		}
@@ -99,8 +99,8 @@ server {
 #	sub_filter_once off;
 #
 	subs_filter_types text/html text/css text/xml;
-	subs_filter scihub2266oqcxt.onion sci.ald-lab.tk;
-    subs_filter http://([^s]\w+).onion http://cyber.sci-hub.tk ir;
+	subs_filter scihub2266oqcxt.onion sci.yageservice.com;
+    subs_filter http://([^s]\w+).onion http://cyber.yageservice.com ir;
 	subs_filter "#reload {"  "#reload {display:none;";
 	subs_filter "#save {"  "#save {display:none;";
 	subs_filter "#donate {"  "#donate {display:none;";
@@ -113,16 +113,16 @@ server {
 server {
     listen 82;
 
-    server_name cyber.sci-hub.tk;
+    server_name cyber.sci-hub.tk cyber.yageservice.com;
 
     location / {
     
-    proxy_set_header Host cyber.sci-hub.bz;
+    proxy_set_header Host osge7iuzcrtmcsng.onion;
     proxy_pass http://104.28.21.155;
-    proxy_redirect http://cyber.sci-hub.tk /;
+    proxy_redirect http://osge7iuzcrtmcsng.onion /;
 # https://osge7iuzcrtmcsny.onion is the onion host name,more reliable than .bz domain
     subs_filter_types text/html text/css text/xml
-    subs_filter cyber.sci-hub.bz cyber.sci-hub.tk;
+    subs_filter cyber.sci-hub.bz cyber.yageservice.com;
     }
 }
 #for google scholar
@@ -130,7 +130,7 @@ server {
 	listen 82;
 	listen [::]:82;
 
-	server_name g.sci-hub.tk;
+	server_name g.sci-hub.tk g.yageservice.com;
 
 	root /var/www/example.com;
 	index index.html;
