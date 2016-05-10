@@ -228,7 +228,7 @@ class ProxyHandler(tornado.web.RequestHandler):
             upstream.connect((host, int(port)), start_tunnel)
 
 
-def run_proxy(port, config_file_path,start_ioloop=True):
+def run_proxy(port, address, config_file_path,start_ioloop=True):
     """
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
@@ -236,15 +236,23 @@ def run_proxy(port, config_file_path,start_ioloop=True):
     app = tornado.web.Application([
         (r'.*', ProxyHandler,dict(config=config_file_path)),
     ])
-    app.listen(port)
+    if(address==None):
+        app.listen(port)
+    else:
+        app.listen(port,address)
     ioloop = tornado.ioloop.IOLoop.instance()
     if start_ioloop:
         ioloop.start()
 
 if __name__ == '__main__':
-    port = 8888
-    if len(sys.argv) > 1:
-        port = int(sys.argv[1])
+    if(os.getenv('OPENSHIFT_PYTHON_IP')==None):
+        ip='0.0.0.0'
+        port = 8888
+        if len(sys.argv) > 1:
+            port = int(sys.argv[1])
+    else:
+        port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
+        ip = os.getenv('OPENSHIFT_PYTHON_IP')
 
-    print ("Starting HTTP proxy on port %d" % port)
-    run_proxy(port,"./site.conf")
+    print ("Starting HTTP proxy on %s port %d" % (ip,port))
+    run_proxy(port,ip,"./site.conf")
