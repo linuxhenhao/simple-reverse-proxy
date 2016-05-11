@@ -145,9 +145,9 @@ class ProxyHandler(tornado.web.RequestHandler):
 #do redirect before fetch request
 #to detect whether the request host is in redirect config rules
             statu=redirect_before_fetch(self.request.host)
-            if(statu==Fals): #not in rules,finish
+            if(statu==False): #not in rules,finish
                 self.set_status(500)
-                self.write('Internal server error:\n' + str(e))
+                self.write('Internal server error:\n')
                 self.finish()
             else:
                 fetch_request(
