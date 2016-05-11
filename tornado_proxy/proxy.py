@@ -77,14 +77,10 @@ class ProxyHandler(tornado.web.RequestHandler):
     #@tornado.web.RequestHandler.initialize
 #add custom config to this class
 #add config=file_path to handler
-    def initialize(self,config,Myfilter):
-        ProxyHandler.config_file=config
+    def initialize(self,parser,Myfilter):
         ProxyHandler.filter=Myfilter
-        ProxyHandler.parser=RawConfigParser()
-        ProxyHandler.parser.read(self.config_file)
+        ProxyHandler.parser=parser
 
-        ProxyHandler.url_prefix=ProxyHandler.parser.get('scholar','scholar_site_url_prefix')
-        ProxyHandler.scihub_host=ProxyHandler.parser.get('scholar','scholar_content_host')
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -103,12 +99,12 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
 
+                response_body=self.filter.filt_content(self.request.uri,response)
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
 
-                if response.body:
-                    response_body=filter.filt_content(self.request.uri,response.body,ProxyHandler.url_prefix,ProxyHandler.scihub_host)
+                if response_body:
                     self.set_header('Content-Length', len(response_body))
                     self.write(response_body)
             self.finish()
@@ -235,9 +231,12 @@ def run_proxy(port, address, config_file_path,start_ioloop=True):
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
     """
-    myfilter=filter.Myfilter(filter.filter_regexs)
+    parser=RawConfigParser()
+    parser.read(config_file_path)
+
+    myfilter=filter.Myfilter(filter.filter_regexs,parser)
     app = tornado.web.Application([
-        (r'.*', ProxyHandler,dict(config=config_file_path,Myfilter=myfilter)),
+        (r'.*', ProxyHandler,dict(parser=parser,Myfilter=myfilter)),
     ])
     if(address==None):
         app.listen(port)
