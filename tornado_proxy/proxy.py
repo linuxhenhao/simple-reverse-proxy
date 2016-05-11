@@ -77,8 +77,9 @@ class ProxyHandler(tornado.web.RequestHandler):
     #@tornado.web.RequestHandler.initialize
 #add custom config to this class
 #add config=file_path to handler
-    def initialize(self,config):
+    def initialize(self,config,Myfilter):
         ProxyHandler.config_file=config
+        ProxyHandler.filter=Myfilter
         ProxyHandler.parser=RawConfigParser()
         ProxyHandler.parser.read(self.config_file)
 
@@ -122,7 +123,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                     self.request.uri=self.request.protocol+"://"+to_host+self.request.uri
                 else: #has host in request.uri ,change to directed host
                     tail=self.request.uri[len(match_result.group()):]
-                    self.request.uri=self.request.protocal+"://"+to_host+tail
+                    self.request.uri=self.request.protocol+"://"+to_host+tail
 
                 self.request.host=to_host
                 self.request.headers['Host']=to_host
@@ -234,8 +235,9 @@ def run_proxy(port, address, config_file_path,start_ioloop=True):
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
     """
+    myfilter=filter.Myfilter(filter.filter_regexs)
     app = tornado.web.Application([
-        (r'.*', ProxyHandler,dict(config=config_file_path)),
+        (r'.*', ProxyHandler,dict(config=config_file_path,Myfilter=myfilter)),
     ])
     if(address==None):
         app.listen(port)
