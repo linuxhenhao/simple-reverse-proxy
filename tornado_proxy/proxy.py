@@ -118,10 +118,11 @@ class ProxyHandler(tornado.web.RequestHandler):
             #deal with self.request.uri
                 host_pattern=re.compile("(https?://)([^/]+)")
                 match_result=host_pattern.match(self.request.uri)
-
-                tail=self.request.uri[len(match_result.group()):]
                 if(match_result==None): #no host info in uri,add it
-                    self.request.uri=self.request.protocol+"://"+to_host+tail
+                    self.request.uri=self.request.protocol+"://"+to_host+self.request.uri
+                else: #has host in request.uri ,change to directed host
+                    tail=self.request.uri[len(match_result.group()):]
+                    self.request.uri=self.request.protocal+"://"+to_host+tail
 
                 self.request.host=to_host
                 self.request.headers['Host']=to_host
