@@ -47,6 +47,7 @@ class Myfilter:
                 down_a.string=u"下载"
                 down_a['href']="http://"+scihub_host+'/'+res_url
                 down_a['class']="gs_nph"
+                down_a['target']='_blank' #open in new tab
                 #insert the down_a after more_a
                 more_a.insert_after(down_a)
             return str(soup) #response.body can't change,so return it
