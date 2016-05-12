@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)http://v3.bootcss.com/getting-started/#migration -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>
+  
+    文献下载
+  
+</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet"  href="http://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<!-- Documentation extras -->
+
+
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+  <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+  <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!-- Favicons -->
+<link rel="apple-touch-icon" href="http://v3.bootcss.com/apple-touch-icon.png">
+<link rel="icon" href="http://v3.bootcss.com/favicon.ico">
+  </head>
+  <body>
+
+    <!-- Docs master nav -->
+    <header></header> 
+
+
+    <!-- Docs page layout -->
+    <div class="main" id="content" >
+      <div class="container">
+            <h2 class="text-center">文献下载</h2>
+            <h3 class="text-center" id="download_link">下载将在稍后自动开始，或直接点击</h3>
+      </div>
+
+        <div class="container bs-docs-container">
+            <iframe style="width:100%;height:100%;" id="pdf"></iframe>
+        </div>
+    </div>
+    <!-- Footer
+================================================== -->
+<footer class="bs-docs-footer" role="contentinfo">
+  <div class="container">
+      <script>
+      function getWindowSize() {
+          var client = {
+                  x:0,
+                  y:0
+                      };
+                               
+          if(typeof document.compatMode != 'undefined' && document.compatMode == 'CSS1Compat') {
+          client.x = document.documentElement.clientWidth;
+          client.y = document.documentElement.clientHeight;
+              } else if(typeof document.body != 'undefined' && (document.body.scrollLeft || document.body.scrollTop)) {
+                      client.x = document.body.clientWidth;
+                      client.y = document.body.clientHeight;
+                                                              }
+                                                                           
+              return client;
+                          }
+          var size = getWindowSize();
+          document.getElementById("main").style.height = size.y+"px"
+      </script>
+</footer>
+</html>
