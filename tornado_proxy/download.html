@@ -35,13 +35,13 @@
 
     <!-- Docs page layout -->
     <div class="main" id="main" >
-      <div class="container">
+      <div class="container" id="header">
             <h2 class="text-center">文献下载</h2>
             <h3 class="text-center" id="download_link">下载将在稍后自动开始，或直接点击</h3>
       </div>
 
         <div class="container bs-docs-container">
-            <iframe style="width:100%;height:0px;padding-bottom:100%" id="pdf"></iframe>
+            <iframe style="width:100%;" id="pdf"></iframe>
         </div>
     </div>
     <!-- Footer
@@ -66,7 +66,7 @@
               return client;
                           }
           var size = getWindowSize();
-          document.getElementById("main").style.height = size.y+"px"
+          document.getElementById("pdf").style.height = size.y-document.getElementById("header").offsetHeight-2+"px"
       </script>
 </footer>
 </html>
