@@ -4,7 +4,7 @@
 import re
 from bs4 import BeautifulSoup
 filter_regexs={'https?://g\.ald-lab\.tk.*/scholar':'filt_scholar',
-        'https?://sci\.ald-lab\.tk':'filt_scihub'}
+        'https?://.*sci-hub\.bz':'filt_scihub'}
 
 class Myfilter:
     def __init__(self,filter_regexs,parser):
@@ -13,10 +13,15 @@ class Myfilter:
         self.rules=[re.compile(i) for i in filter_regexs.keys()]
 
     def filt_content(self,url,response,**kwargs):
+        response_body=response.body
         for rule in self.rules:
             if(rule.match(url)!=None): #in filter rules
                 filt_name=self.filter_regexs[rule.pattern]
-                return getattr(self,filt_name)(response,**kwargs)
+                return_body=getattr(self,filt_name)(response,**kwargs)
+                if(return_body!=None):
+                    response_body=return_body
+        return response_body
+
 
 
     def filt_scholar(self,response): #scholar's filter
@@ -46,6 +51,25 @@ class Myfilter:
                 more_a.insert_after(down_a)
             return str(soup) #response.body can't change,so return it
 
-    def filt_scihub(self,response,**kwargs):
-        None
+    def filt_scihub(self,response):
+        if('location' in response.request.headers):
+            None
+        if(response.body==None):
+            return
+        soup=BeautifulSoup(response.body,'html.parser')
+        save=soup.findAll('div',attrs={'id':'save'})[0]
+        if(len(save)==0): #not in download page
+            return
+#There is in download page
+        new_download_html=open(self.parser.get('scholar','download_html')).read()
+        new_download_soup=BeautifulSoup(new_download_html,'html.parser')
+
+        new_download_soup.iframe['src']=soup.iframe['src']
+
+        download_link_h3=new_download_soup.findAll(attrs={'id':'download_link'})[0]
+
+        save.a.string=u'下载链接'
+        download_link_h3.insert(1,save.a)
+        return str(new_download_soup)
+
 

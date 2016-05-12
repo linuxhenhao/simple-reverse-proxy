@@ -112,6 +112,7 @@ class ProxyHandler(tornado.web.RequestHandler):
         def redirect_before_fetch(host):
             if(self.parser.has_option('redirect',host)): #this url is in redirect rules
                 to_host = self.parser.get('redirect',host)
+                print ">>redirect from "+host+" to "+to_host
             #deal with self.request.uri
                 host_pattern=re.compile("(https?://)([^/]+)")
                 match_result=host_pattern.match(self.request.uri)
@@ -122,7 +123,10 @@ class ProxyHandler(tornado.web.RequestHandler):
                     self.request.uri=self.request.protocol+"://"+to_host+tail
 
                 self.request.host=to_host
-                self.request.headers['Host']=to_host
+                self.request.headers['Host']=to_host #This is different form request.host
+                if('Referer' in self.request.headers):
+                    del self.request.headers['Referer']
+                print self.request
                 return True
             else: #not in config rules
                 return False
