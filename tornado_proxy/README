@@ -1,0 +1,12 @@
+tornado using httpclient.fetch to fetch request,
+nothing in the callback class that call fetch including self.request 
+will send to httpclient.fetch function underground.
+
+so the fetch function only uses  params given to it,request is necessary,
+other things such as headers are optional.
+
+Thus, if we want to do something like this:
+fetch from host A,but using info in request.headers['host'] to identify the server;
+We do this 
+client.fetch('https?://realhost/xxx',headers),the server name should be stored in headers
+realhost is where the client should fetch contents from
