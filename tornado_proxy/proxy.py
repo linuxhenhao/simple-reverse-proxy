@@ -99,7 +99,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
 
-                response_body=self.filter.filt_content(self.request.uri,response)
+                response_body=self.filter.filt_content(self.url_before_selfresolve,response)
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
@@ -118,14 +118,16 @@ class ProxyHandler(tornado.web.RequestHandler):
                 else:
                     real_host=to_host
 
-                print ">>redirect from "+host+" to "+to_host
+            #    print ">>redirect from "+host+" to "+to_host
             #deal with self.request.uri
                 host_pattern=re.compile("(https?://)([^/]+)")
                 match_result=host_pattern.match(self.request.uri)
                 if(match_result==None): #no host info in uri,add it
+                    self.url_before_selfresolve=self.request.protocol+"://"+to_host+self.request.uri
                     self.request.uri=self.request.protocol+"://"+real_host+self.request.uri
                 else: #has host in request.uri ,change to directed host
                     tail=self.request.uri[len(match_result.group()):]
+                    self.url_before_selfresolve=self.request.protocol+"://"+to_host+tail
                     self.request.uri=self.request.protocol+"://"+real_host+tail
 
                 self.request.host=real_host
