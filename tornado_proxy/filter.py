@@ -27,10 +27,13 @@ class Myfilter:
     def filt_scholar(self,response): #scholar's filter
             scihub_host=self.parser.get('scholar','scihub_host')
             soup=BeautifulSoup(response.body,"html.parser")
-            answer_list=soup.findAll(attrs={"class":"gs_ri"})
+            answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return
             for item in answer_list: #every item is a block contains [h3 header|brief content|some operations]
+                item=item.find(attrs={"class":"gs_ri"})
+                if(item==None): #no gs_ri found,continue
+                    continue
                 if(item.h3==None): #not paper or patent block,ignore
                     continue
                 if(item.h3.a==None): #no resource url,continue
