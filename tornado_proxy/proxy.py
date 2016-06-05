@@ -134,7 +134,6 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.request.headers['Host']=to_host #This is different form request.host
                 if('Referer' in self.request.headers):
                     del self.request.headers['Referer']
-                print self.request
                 return True
             else: #not in config rules
                 return False
