@@ -31,6 +31,8 @@ class Myfilter:
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return
             for item in answer_list: #every item is a block contains [h3 header|brief content|some operations]
+                if(item.h3==None): #not paper or patent block,ignore
+                    continue
                 if(item.h3.a==None): #no resource url,continue
                     continue
 
