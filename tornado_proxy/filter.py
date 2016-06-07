@@ -3,12 +3,11 @@
 # filters to modify the http headers and response body
 import re
 from bs4 import BeautifulSoup
-filter_regexs={'https?://g\.ald-lab\.tk.*/scholar':'filt_scholar',
-        'https?://.*sci-hub\.bz':'filt_scihub'}
 
 class Myfilter:
     def __init__(self,filter_regexs,parser):
         self.parser=parser #site.conf file parser
+        print filter_regexs
         self.filter_regexs=filter_regexs
         self.rules=[re.compile(i) for i in filter_regexs.keys()]
 
