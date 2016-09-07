@@ -1,3 +1,4 @@
+
 Things just work!
 ------------------
-The next thing is to add the function of multiple filters
+add url_redirect in site.conf and using url redirect to replace host_redirect or sth
