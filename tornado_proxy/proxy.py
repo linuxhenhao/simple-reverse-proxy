@@ -273,5 +273,7 @@ if __name__ == '__main__':
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
 
+    pwd = os.path.dirname(os.path.realpath(__file__))
+
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
-    run_proxy(port,ip,"./site.conf",'regexs')
+    run_proxy(port,ip,pwd+"/site.conf",'regexs')
