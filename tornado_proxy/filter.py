@@ -5,8 +5,9 @@ import re
 from bs4 import BeautifulSoup
 
 class Myfilter:
-    def __init__(self,filter_regexs,parser):
+    def __init__(self,filter_regexs,parser,workdir):
         self.parser=parser #site.conf file parser
+        self.workdir=workdir
         print filter_regexs
         self.filter_regexs=filter_regexs
         self.rules=[re.compile(i) for i in filter_regexs.keys()]
@@ -66,7 +67,7 @@ class Myfilter:
         if(len(save)==0): #not in download page
             return
 #There is in download page
-        new_download_html=open(self.parser.get('scholar','download_html')).read()
+        new_download_html=open(workdir+self.parser.get('scholar','download_html')).read()
         new_download_soup=BeautifulSoup(new_download_html,'html.parser')
 
         new_download_soup.iframe['src']=soup.iframe['src']

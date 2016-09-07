@@ -242,16 +242,16 @@ class ProxyHandler(tornado.web.RequestHandler):
             upstream.connect((host, int(port)), start_tunnel)
 
 
-def run_proxy(port, address, config_file_path, regexs_section,start_ioloop=True):
+def run_proxy(port, address, workdir ,config_file_path, regexs_section,start_ioloop=True):
     """
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
     """
     parser=RawConfigParser()
-    parser.read(config_file_path)
+    parser.read(workdir+config_file_path)
     filter_regexs=config2dict(parser,regexs_section)
 
-    myfilter=filter.Myfilter(filter_regexs,parser)
+    myfilter=filter.Myfilter(filter_regexs,parser,workdir)
     app = tornado.web.Application([
         (r'.*', ProxyHandler,dict(parser=parser,Myfilter=myfilter)),
     ])
@@ -273,7 +273,7 @@ if __name__ == '__main__':
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
 
-    pwd = os.path.dirname(os.path.realpath(__file__))
+    pwd = os.path.dirname(os.path.realpath(__file__))+'/'
 
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
-    run_proxy(port,ip,pwd+"/site.conf",'regexs')
+    run_proxy(port,ip,pwd,"site.conf",'regexs')
