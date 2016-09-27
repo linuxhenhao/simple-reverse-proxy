@@ -75,6 +75,47 @@ def fetch_request(url, callback, **kwargs):
     client = tornado.httpclient.AsyncHTTPClient()
     client.fetch(req, callback, raise_error=False)
 
+def get_host(url):
+    #url is something like http://www.baidu.com/word?
+    items=url.split('/')  #[http,'',host,uri] 2 is host
+    if(items[0].find('http')!=-1): #found 'http'
+        try:
+            return items[2]
+        except:
+            logger.debug('url format error when get_host')
+            return None
+
+
+def get_target_url_by_pattern_result(pattern_result,target_val):
+    # pattern results is re.match's result 
+    # target val is a target url that using $number as signature for replace by pattern result 
+    signature_position_list=list()
+    target_val_length_minus1=len(target_val)-1
+    position=target_val.find('$')
+    
+    while(position!=-1):
+        signature_position_list.append(position)
+        if(position==target_val_length_minus1):
+            break
+        position=target_val.find('$',position+1)
+
+    signature_position_list_length=len(signature_position_list)
+    if(signature_position_list_length%2!=0):
+        logger.debug('counts of $ in url_redirect rule don\'t match')
+        return None
+
+    number=int(target_val[ signature_position_list(0) : signature_position_list(1) ])
+    target_url=target_val[ :signature_position_list(0) ]+pattern_result.groups(number)
+    for i in xrange(2,signature_position_list_length,2):
+        number=int(target_val[ signature_position_list(i) : signature_position_list(i+1) ])
+        target_url+=target_val[ signature_position_list(i-1)+1: signature_position_list(i)]+pattern_result.groups(number)
+    
+    if(signature_position_list(-1)!=target_val_length_minus1):
+        target_url+=target_val[signature_position_list(-1)+1:]
+
+    return target_url        
+
+
 
 class ProxyHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET', 'POST', 'CONNECT']
@@ -85,7 +126,10 @@ class ProxyHandler(tornado.web.RequestHandler):
     def initialize(self,parser,Myfilter):
         ProxyHandler.filter=Myfilter
         ProxyHandler.parser=parser
-
+        ProxyHandler.pattern_target_list=list()
+        key_val_list=self.parser.items('url_redirect')
+        for key,val in key_val_list:
+            patten_target_list.append(re.compile(key),val)
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -114,8 +158,12 @@ class ProxyHandler(tornado.web.RequestHandler):
                     self.write(response_body)
             self.finish()
 
-        def redirect_before_fetch(host):
-            if(self.parser.has_option('host_redirect',host)): #this url is in redirect rules
+        def redirect_before_fetch(url):
+            for re_pattern,target in pattern_target_list:
+                match_result=re_pattern.match(url)
+                if(match_result!=None): # matched
+                    match_result.
+            if(self.parser.has_option('url_redirect',host)): #this url is in redirect rules
                 to_host = self.parser.get('host_redirect',host)
                 if(self.parser.has_option('selfresolve',to_host)): #has to_host's host
                                                                     #info
@@ -158,7 +206,7 @@ class ProxyHandler(tornado.web.RequestHandler):
 
 #do redirect before fetch request
 #to detect whether the request host is in redirect config rules
-            statu=redirect_before_fetch(self.request.host)
+            statu=redirect_before_fetch(self.request.uri)
             if(statu==False): #not in rules,finish
                 self.set_status(500)
                 self.write('Internal server error:\n')
