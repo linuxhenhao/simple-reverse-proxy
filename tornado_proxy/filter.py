@@ -27,6 +27,14 @@ class Myfilter:
     def filt_scholar(self,response): #scholar's filter
             scihub_host=self.parser.get('scholar','scihub_host')
             soup=BeautifulSoup(response.body,"html.parser")
+
+#replace all real_shcolar_host to self_scholar_host
+            a_list=soup.findAll('a')
+            for a in a_list:
+                href=a.get('href')
+                if(href!=None):
+                    a['href']=href.replace(real_shcolar_host,self_scholar_host)
+
             answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return

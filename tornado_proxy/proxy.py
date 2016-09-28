@@ -87,12 +87,12 @@ def get_host(url):
 
 
 def get_target_url_by_pattern_result(pattern_result,target_val):
-    # pattern results is re.match's result 
-    # target val is a target url that using $number as signature for replace by pattern result 
+    # pattern results is re.match's result
+    # target val is a target url that using $number as signature for replace by pattern result
     signature_position_list=list()
     target_val_length_minus1=len(target_val)-1
     position=target_val.find('$')
-    
+
     while(position!=-1):
         signature_position_list.append(position)
         if(position==target_val_length_minus1):
@@ -104,16 +104,16 @@ def get_target_url_by_pattern_result(pattern_result,target_val):
         logger.debug('counts of $ in url_redirect rule don\'t match')
         return None
 
-    number=int(target_val[ signature_position_list(0) : signature_position_list(1) ])
-    target_url=target_val[ :signature_position_list(0) ]+pattern_result.groups(number)
+    number=int(target_val[ signature_position_list[0]+1 : signature_position_list[1] ])
+    target_url=target_val[ :signature_position_list[0] ]+pattern_result.groups()[number]
     for i in xrange(2,signature_position_list_length,2):
-        number=int(target_val[ signature_position_list(i) : signature_position_list(i+1) ])
-        target_url+=target_val[ signature_position_list(i-1)+1: signature_position_list(i)]+pattern_result.groups(number)
-    
-    if(signature_position_list(-1)!=target_val_length_minus1):
-        target_url+=target_val[signature_position_list(-1)+1:]
+        number=int(target_val[ signature_position_list[i]+1 : signature_position_list[i+1]])
+        target_url+=target_val[ signature_position_list[i-1]+1: signature_position_list[i]]+pattern_result.groups()[number]
 
-    return target_url        
+    if(signature_position_list[-1]!=target_val_length_minus1):
+        target_url+=target_val[signature_position_list[-1]+1:]
+
+    return target_url
 
 
 
@@ -129,7 +129,7 @@ class ProxyHandler(tornado.web.RequestHandler):
         ProxyHandler.pattern_target_list=list()
         key_val_list=self.parser.items('url_redirect')
         for key,val in key_val_list:
-            patten_target_list.append(re.compile(key),val)
+            ProxyHandler.pattern_target_list.append((re.compile(key),val))
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -159,26 +159,28 @@ class ProxyHandler(tornado.web.RequestHandler):
             self.finish()
 
         def redirect_before_fetch(url):
-            for re_pattern,target in pattern_target_list:
+            for re_pattern,target in self.pattern_target_list:
                 match_result=re_pattern.match(url)
                 if(match_result!=None): # matched
                     target_url=get_target_url_by_pattern_result(match_result,target)
                     if(target_url!=None):
                         self.request.uri=target_url
+                        self.url_before_selfresolve=target_url
 
                         target_host=get_host(target_url)
                         if(target_host!=None):
                             self.request.host=self.request.headers['Host']=target_host
-                             #request.headers['Host'] is different form request.host                            
+                             #request.headers['Host'] is different form request.host
 
-                            splited_host=host.split(":")
+                            splited_host=target_host.split(":")
                             host_without_port=splited_host[0]
-                            if(self.parser.has_option('selfresolve',host_without_port) #dispite the effects of port in host section
+                            if(self.parser.has_option('selfresolve',host_without_port)):
+                            #dispite the effects of port in host section
                                 real_host=self.parser.get('selfresolve',host_without_port)
                                 self.request.uri=target_url.replace(host_without_port,real_host)
-                                self.request.host=self.request.headers['Host']=target_host.replace(host_without_port,real_host)
-                            
-                            if('Referer' in self.request.headers): #delete Referer in headers 
+                                self.request.host=target_host.replace(host_without_port,real_host)
+
+                            if('Referer' in self.request.headers): #delete Referer in headers
                                 del self.request.headers['Referer']
                             return True #if program runs to selfresolve step, always return True,url redirect finishied
 
@@ -188,7 +190,7 @@ class ProxyHandler(tornado.web.RequestHandler):
 
             #    print ">>redirect from "+host+" to "+to_host
 
-               
+
 
 
         body = self.request.body
