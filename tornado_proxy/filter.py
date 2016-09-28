@@ -33,7 +33,9 @@ class Myfilter:
             for a in a_list:
                 href=a.get('href')
                 if(href!=None):
-                    a['href']=href.replace(real_shcolar_host,self_scholar_host)
+                    a['href']=href.replace(self.parser.get('scholar',\
+                        'real_shcolar_host'),self.parser.get('scholar',\
+                            'self_scholar_host'))
 
             answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
