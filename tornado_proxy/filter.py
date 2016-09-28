@@ -68,10 +68,11 @@ class Myfilter:
             return str(soup) #response.body can't change,so return it
 
     def filt_scihub(self,response):
-        print 'response headers: ',response.request.headers
-        if('location' in response.request.headers):
-            None
+        #if('location' in response.request.headers):
+        #    None
         if(response.body==None):
+            return                  #no page,do nothing,the same as follow situation
+        if(len(response.body)<=10): #too short not a html page,do nothing
             return
         soup=BeautifulSoup(response.body,'html.parser')
         save=soup.findAll('div',attrs={'id':'save'})[0]

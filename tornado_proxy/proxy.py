@@ -147,7 +147,6 @@ class ProxyHandler(tornado.web.RequestHandler):
             else:
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
-
                 response_body=self.filter.filt_content(self.url_before_selfresolve,response)
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
