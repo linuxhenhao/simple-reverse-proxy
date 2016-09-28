@@ -162,34 +162,34 @@ class ProxyHandler(tornado.web.RequestHandler):
             for re_pattern,target in pattern_target_list:
                 match_result=re_pattern.match(url)
                 if(match_result!=None): # matched
-                    match_result.
-            if(self.parser.has_option('url_redirect',host)): #this url is in redirect rules
-                to_host = self.parser.get('host_redirect',host)
-                if(self.parser.has_option('selfresolve',to_host)): #has to_host's host
-                                                                    #info
-                    real_host=self.parser.get('selfresolve',to_host)
-                else:
-                    real_host=to_host
+                    target_url=get_target_url_by_pattern_result(match_result,target)
+                    if(target_url!=None):
+                        self.request.uri=target_url
+
+                        target_host=get_host(target_url)
+                        if(target_host!=None):
+                            self.request.host=self.request.headers['Host']=target_host
+                             #request.headers['Host'] is different form request.host                            
+
+                            splited_host=host.split(":")
+                            host_without_port=splited_host[0]
+                            if(self.parser.has_option('selfresolve',host_without_port) #dispite the effects of port in host section
+                                real_host=self.parser.get('selfresolve',host_without_port)
+                                self.request.uri=target_url.replace(host_without_port,real_host)
+                                self.request.host=self.request.headers['Host']=target_host.replace(host_without_port,real_host)
+                            
+                            if('Referer' in self.request.headers): #delete Referer in headers 
+                                del self.request.headers['Referer']
+                            return True #if program runs to selfresolve step, always return True,url redirect finishied
+
+            return False
+
+
 
             #    print ">>redirect from "+host+" to "+to_host
-            #deal with self.request.uri
-                host_pattern=re.compile("(https?://)([^/]+)")
-                match_result=host_pattern.match(self.request.uri)
-                if(match_result==None): #no host info in uri,add it
-                    self.url_before_selfresolve=self.request.protocol+"://"+to_host+self.request.uri
-                    self.request.uri=self.request.protocol+"://"+real_host+self.request.uri
-                else: #has host in request.uri ,change to directed host
-                    tail=self.request.uri[len(match_result.group()):]
-                    self.url_before_selfresolve=self.request.protocol+"://"+to_host+tail
-                    self.request.uri=self.request.protocol+"://"+real_host+tail
 
-                self.request.host=real_host
-                self.request.headers['Host']=to_host #This is different form request.host
-                if('Referer' in self.request.headers):
-                    del self.request.headers['Referer']
-                return True
-            else: #not in config rules
-                return False
+               
+
 
         body = self.request.body
         if not body:
