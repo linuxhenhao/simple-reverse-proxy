@@ -75,7 +75,11 @@ class Myfilter:
         if(len(response.body)<=10): #too short not a html page,do nothing
             return
         soup=BeautifulSoup(response.body,'html.parser')
-        save=soup.findAll('div',attrs={'id':'save'})[0]
+        try:
+            save=soup.findAll('div',attrs={'id':'save'})[0]
+        except: #cannot find save div,means no the webpage we predicted,so do noting
+            return
+
         if(len(save)==0): #not in download page
             return
 #There is in download page
