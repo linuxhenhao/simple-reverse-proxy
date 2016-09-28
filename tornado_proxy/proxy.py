@@ -115,6 +115,11 @@ def get_target_url_by_pattern_result(pattern_result,target_val):
 
     return target_url
 
+def add_server_name_compiled_list_to_parser(parser):
+    server_name_list=parser.items('server_name')
+    parser.server_name_compiled_list=list()
+    for k,v in server_name_list:
+        parser.server_name_compiled_list.append(re.compile(v))
 
 
 class ProxyHandler(tornado.web.RequestHandler):
@@ -197,6 +202,13 @@ class ProxyHandler(tornado.web.RequestHandler):
         try:
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
+#first of all,judge whether the request's host is what we server for
+            for re_compiled in self.parser.server_name_compiled_list:
+                if(re_compiled.match(self.request.host)):
+                    continue
+                else:
+                    self.finish()
+                    return
 
 # complete all the uri from "GET /xxx" to "GET https?://host/xxx"
             host_pattern=re.compile("(https?://)([^/]+)")
@@ -298,6 +310,9 @@ def run_proxy(port, address, workdir ,config_file_path, regexs_section,start_iol
     parser=RawConfigParser()
     parser.read(workdir+config_file_path)
     filter_regexs=config2dict(parser,regexs_section)
+
+    add_server_name_compiled_list_to_parser(parser)
+    #now parser.server_name_compiled_list exists
 
     myfilter=filter.Myfilter(filter_regexs,parser,workdir)
     app = tornado.web.Application([
