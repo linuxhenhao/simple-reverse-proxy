@@ -68,6 +68,7 @@ class Myfilter:
             return str(soup) #response.body can't change,so return it
 
     def filt_scihub(self,response):
+        print 'response headers: ',response.request.headers
         if('location' in response.request.headers):
             None
         if(response.body==None):
