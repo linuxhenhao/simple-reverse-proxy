@@ -75,6 +75,52 @@ def fetch_request(url, callback, **kwargs):
     client = tornado.httpclient.AsyncHTTPClient()
     client.fetch(req, callback, raise_error=False)
 
+def get_host(url):
+    #url is something like http://www.baidu.com/word?
+    items=url.split('/')  #[http,'',host,uri] 2 is host
+    if(items[0].find('http')!=-1): #found 'http'
+        try:
+            return items[2]
+        except:
+            logger.debug('url format error when get_host')
+            return None
+
+
+def get_target_url_by_pattern_result(pattern_result,target_val):
+    # pattern results is re.match's result
+    # target val is a target url that using $number as signature for replace by pattern result
+    signature_position_list=list()
+    target_val_length_minus1=len(target_val)-1
+    position=target_val.find('$')
+
+    while(position!=-1):
+        signature_position_list.append(position)
+        if(position==target_val_length_minus1):
+            break
+        position=target_val.find('$',position+1)
+
+    signature_position_list_length=len(signature_position_list)
+    if(signature_position_list_length%2!=0):
+        logger.debug('counts of $ in url_redirect rule don\'t match')
+        return None
+
+    number=int(target_val[ signature_position_list[0]+1 : signature_position_list[1] ])
+    target_url=target_val[ :signature_position_list[0] ]+pattern_result.groups()[number]
+    for i in xrange(2,signature_position_list_length,2):
+        number=int(target_val[ signature_position_list[i]+1 : signature_position_list[i+1]])
+        target_url+=target_val[ signature_position_list[i-1]+1: signature_position_list[i]]+pattern_result.groups()[number]
+
+    if(signature_position_list[-1]!=target_val_length_minus1):
+        target_url+=target_val[signature_position_list[-1]+1:]
+
+    return target_url
+
+def add_server_name_compiled_list_to_parser(parser):
+    server_name_list=parser.items('server_name')
+    parser.server_name_compiled_list=list()
+    for k,v in server_name_list:
+        parser.server_name_compiled_list.append(re.compile(v))
+
 
 class ProxyHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET', 'POST', 'CONNECT']
@@ -85,7 +131,10 @@ class ProxyHandler(tornado.web.RequestHandler):
     def initialize(self,parser,Myfilter):
         ProxyHandler.filter=Myfilter
         ProxyHandler.parser=parser
-
+        ProxyHandler.pattern_target_list=list()
+        key_val_list=self.parser.items('url_redirect')
+        for key,val in key_val_list:
+            ProxyHandler.pattern_target_list.append((re.compile(key),val))
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -96,14 +145,12 @@ class ProxyHandler(tornado.web.RequestHandler):
                      self.request.uri)
 
         def handle_response(response):
-            if (response.error and not
-                    isinstance(response.error, tornado.httpclient.HTTPError)):
+            if (response.error):
                 self.set_status(500)
                 self.write('Internal server error:\n' + str(response.error))
             else:
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
-
                 response_body=self.filter.filt_content(self.url_before_selfresolve,response)
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
@@ -114,34 +161,40 @@ class ProxyHandler(tornado.web.RequestHandler):
                     self.write(response_body)
             self.finish()
 
-        def redirect_before_fetch(host):
-            if(self.parser.has_option('redirect',host)): #this url is in redirect rules
-                to_host = self.parser.get('redirect',host)
-                if(self.parser.has_option('redirect_host',to_host)): #has to_host's host
-                                                                    #info
-                    real_host=self.parser.get('redirect_host',to_host)
-                else:
-                    real_host=to_host
+        def redirect_before_fetch(url):
+            for re_pattern,target in self.pattern_target_list:
+                match_result=re_pattern.match(url)
+                if(match_result!=None): # matched
+                    target_url=get_target_url_by_pattern_result(match_result,target)
+                    if(target_url!=None):
+                        self.request.uri=target_url
+                        self.url_before_selfresolve=target_url
+
+                        target_host=get_host(target_url)
+                        if(target_host!=None):
+                            self.request.host=self.request.headers['Host']=target_host
+                             #request.headers['Host'] is different form request.host
+
+                            splited_host=target_host.split(":")
+                            host_without_port=splited_host[0]
+                            if(self.parser.has_option('selfresolve',host_without_port)):
+                            #dispite the effects of port in host section
+                                real_host=self.parser.get('selfresolve',host_without_port)
+                                self.request.uri=target_url.replace(host_without_port,real_host)
+                                self.request.host=target_host.replace(host_without_port,real_host)
+
+                            if('Referer' in self.request.headers): #delete Referer in headers
+                                del self.request.headers['Referer']
+                            return True #if program runs to selfresolve step, always return True,url redirect finishied
+
+            return False
+
+
 
             #    print ">>redirect from "+host+" to "+to_host
-            #deal with self.request.uri
-                host_pattern=re.compile("(https?://)([^/]+)")
-                match_result=host_pattern.match(self.request.uri)
-                if(match_result==None): #no host info in uri,add it
-                    self.url_before_selfresolve=self.request.protocol+"://"+to_host+self.request.uri
-                    self.request.uri=self.request.protocol+"://"+real_host+self.request.uri
-                else: #has host in request.uri ,change to directed host
-                    tail=self.request.uri[len(match_result.group()):]
-                    self.url_before_selfresolve=self.request.protocol+"://"+to_host+tail
-                    self.request.uri=self.request.protocol+"://"+real_host+tail
 
-                self.request.host=real_host
-                self.request.headers['Host']=to_host #This is different form request.host
-                if('Referer' in self.request.headers):
-                    del self.request.headers['Referer']
-                return True
-            else: #not in config rules
-                return False
+
+
 
         body = self.request.body
         if not body:
@@ -149,6 +202,13 @@ class ProxyHandler(tornado.web.RequestHandler):
         try:
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
+#first of all,judge whether the request's host is what we server for
+            for re_compiled in self.parser.server_name_compiled_list:
+                if(re_compiled.match(self.request.host)):
+                    continue
+                else:
+                    self.finish()
+                    return
 
 # complete all the uri from "GET /xxx" to "GET https?://host/xxx"
             host_pattern=re.compile("(https?://)([^/]+)")
@@ -158,7 +218,7 @@ class ProxyHandler(tornado.web.RequestHandler):
 
 #do redirect before fetch request
 #to detect whether the request host is in redirect config rules
-            statu=redirect_before_fetch(self.request.host)
+            statu=redirect_before_fetch(self.request.uri)
             if(statu==False): #not in rules,finish
                 self.set_status(500)
                 self.write('Internal server error:\n')
@@ -167,7 +227,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
-                headers=self.request.headers, follow_redirects=False,
+                headers=self.request.headers, follow_redirects=True,
                 allow_nonstandard_methods=True)
         except tornado.httpclient.HTTPError as e:
             if hasattr(e, 'response') and e.response:
@@ -242,16 +302,19 @@ class ProxyHandler(tornado.web.RequestHandler):
             upstream.connect((host, int(port)), start_tunnel)
 
 
-def run_proxy(port, address, config_file_path, regexs_section,start_ioloop=True):
+def run_proxy(port, address, workdir ,config_file_path, regexs_section,start_ioloop=True):
     """
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
     """
     parser=RawConfigParser()
-    parser.read(config_file_path)
+    parser.read(workdir+config_file_path)
     filter_regexs=config2dict(parser,regexs_section)
 
-    myfilter=filter.Myfilter(filter_regexs,parser)
+    add_server_name_compiled_list_to_parser(parser)
+    #now parser.server_name_compiled_list exists
+
+    myfilter=filter.Myfilter(filter_regexs,parser,workdir)
     app = tornado.web.Application([
         (r'.*', ProxyHandler,dict(parser=parser,Myfilter=myfilter)),
     ])
@@ -273,5 +336,7 @@ if __name__ == '__main__':
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
 
+    pwd = os.path.dirname(os.path.realpath(__file__))+'/'
+
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
-    run_proxy(port,ip,"./site.conf",'regexs')
+    run_proxy(port,ip,pwd,"site.conf",'regexs')

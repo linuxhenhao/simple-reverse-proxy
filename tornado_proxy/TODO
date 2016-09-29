@@ -1,3 +1,7 @@
+
 Things just work!
 ------------------
-The next thing is to add the function of multiple filters
+add url_redirect in site.conf and using url redirect to replace host_redirect or sth
+
+The 'Host' section in url request include the port of the server address,such as 179.31.0.23:8080
+the default port is 80 for http and 443 for https respectively.

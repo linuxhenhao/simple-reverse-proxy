@@ -5,8 +5,9 @@ import re
 from bs4 import BeautifulSoup
 
 class Myfilter:
-    def __init__(self,filter_regexs,parser):
+    def __init__(self,filter_regexs,parser,workdir):
         self.parser=parser #site.conf file parser
+        self.workdir=workdir
         print filter_regexs
         self.filter_regexs=filter_regexs
         self.rules=[re.compile(i) for i in filter_regexs.keys()]
@@ -26,6 +27,16 @@ class Myfilter:
     def filt_scholar(self,response): #scholar's filter
             scihub_host=self.parser.get('scholar','scihub_host')
             soup=BeautifulSoup(response.body,"html.parser")
+
+#replace all real_shcolar_host to self_scholar_host
+            a_list=soup.findAll('a')
+            for a in a_list:
+                href=a.get('href')
+                if(href!=None):
+                    a['href']=href.replace(self.parser.get('scholar',\
+                        'real_scholar_host'),self.parser.get('scholar',\
+                            'self_scholar_host'))
+
             answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return
@@ -57,16 +68,22 @@ class Myfilter:
             return str(soup) #response.body can't change,so return it
 
     def filt_scihub(self,response):
-        if('location' in response.request.headers):
-            None
+        #if('location' in response.request.headers):
+        #    None
         if(response.body==None):
+            return                  #no page,do nothing,the same as follow situation
+        if(len(response.body)<=10): #too short not a html page,do nothing
             return
         soup=BeautifulSoup(response.body,'html.parser')
-        save=soup.findAll('div',attrs={'id':'save'})[0]
+        try:
+            save=soup.findAll('div',attrs={'id':'save'})[0]
+        except: #cannot find save div,means no the webpage we predicted,so do noting
+            return
+
         if(len(save)==0): #not in download page
             return
 #There is in download page
-        new_download_html=open(self.parser.get('scholar','download_html')).read()
+        new_download_html=open(self.workdir+self.parser.get('scholar','download_html')).read()
         new_download_soup=BeautifulSoup(new_download_html,'html.parser')
 
         new_download_soup.iframe['src']=soup.iframe['src']
