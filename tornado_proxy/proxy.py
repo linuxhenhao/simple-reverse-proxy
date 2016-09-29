@@ -121,6 +121,12 @@ def add_server_name_compiled_list_to_parser(parser):
     for k,v in server_name_list:
         parser.server_name_compiled_list.append(re.compile(v))
 
+def is_server_name_right(compiled_server_name_list,request_host):
+    for re_server_pattern in compiled_server_name_list:
+        if(re_server_pattern.match(request_host)):
+            return True
+        else:
+            return False
 
 class ProxyHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET', 'POST', 'CONNECT']
@@ -203,10 +209,8 @@ class ProxyHandler(tornado.web.RequestHandler):
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
 #first of all,judge whether the request's host is what we server for
-            for re_compiled in self.parser.server_name_compiled_list:
-                if(re_compiled.match(self.request.host)):
-                    continue
-                else:
+            if(is_server_name_right(self.parser.server_name_compiled_list,\
+                    self.request.host)==False):
                     self.finish()
                     return
 
@@ -244,6 +248,10 @@ class ProxyHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def connect(self):
         logger.debug('Start CONNECT to %s', self.request.uri)
+        if(is_server_name_right(self.parser.server_name_compiled_list,\
+                    self.request.host)==False):
+                    self.finish()
+                    return
         host, port = self.request.uri.split(':')
         client = self.request.connection.stream
 
