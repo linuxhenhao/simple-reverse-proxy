@@ -71,6 +71,8 @@ def fetch_request(url, callback, **kwargs):
         kwargs['proxy_host'] = host
         kwargs['proxy_port'] = port
 
+    tornado.httpclient.AsyncHTTPClient.configure(
+        'tornado.curl_httpclient.CurlAsyncHTTPClient')
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
     try:
