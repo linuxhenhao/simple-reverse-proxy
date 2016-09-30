@@ -1,7 +1,10 @@
+now google will do bot check every first time a browser open scholar.
+google.com from my vps server, So I need solve this problem by deal
+with the 'Location' returned by the scholar.google.com
 
-Things just work!
-------------------
-add url_redirect in site.conf and using url redirect to replace host_redirect or sth
-
-The 'Host' section in url request include the port of the server address,such as 179.31.0.23:8080
-the default port is 80 for http and 443 for https respectively.
+Now,Location replace by my own ipv4.xxx.com is working.
+But when fetch_url do fetch from ipv4.google.com,though the server 
+return the bot check image and other content, the HTTPResponse.code 
+is 503.
+/////Tornado think this is an erro and abort the fetch work,
+/////SOLVE THIS!!!

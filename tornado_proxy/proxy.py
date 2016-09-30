@@ -73,7 +73,10 @@ def fetch_request(url, callback, **kwargs):
 
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
-    client.fetch(req, callback, raise_error=False)
+    try:
+        client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
+    except e:
+        print e
 
 def get_host(url):
     #url is something like http://www.baidu.com/word?
