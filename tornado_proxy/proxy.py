@@ -147,6 +147,14 @@ class ProxyHandler(tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def get(self):
+#first of all,judge whether the request's host is what we server for
+        if(is_server_name_right(self.parser.server_name_compiled_list,\
+                    self.request.host)==False):
+            logger.debug('request uri %s\'s server name not in list',\
+                    self.request.uri)
+            self.finish()
+            return
+
         logger.debug('Handle %s request to %s', self.request.method,
                      self.request.uri)
 
@@ -208,11 +216,6 @@ class ProxyHandler(tornado.web.RequestHandler):
         try:
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
-#first of all,judge whether the request's host is what we server for
-            if(is_server_name_right(self.parser.server_name_compiled_list,\
-                    self.request.host)==False):
-                    self.finish()
-                    return
 
 # complete all the uri from "GET /xxx" to "GET https?://host/xxx"
             host_pattern=re.compile("(https?://)([^/]+)")
@@ -247,11 +250,13 @@ class ProxyHandler(tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def connect(self):
-        logger.debug('Start CONNECT to %s', self.request.uri)
         if(is_server_name_right(self.parser.server_name_compiled_list,\
                     self.request.host)==False):
-                    self.finish()
-                    return
+            logger.debug('request uri %s\'s server name not in list',\
+                    self.request.uri)
+            self.finish()
+            return
+        logger.debug('Start CONNECT to %s', self.request.uri)
         host, port = self.request.uri.split(':')
         client = self.request.connection.stream
 
