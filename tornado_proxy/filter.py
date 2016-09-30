@@ -22,7 +22,7 @@ class Myfilter:
                     response_body=return_body
         return response_body
 
-    def _replace_host(soup,real_host,replace_to_host):
+    def _replace_host(self,soup,real_host,replace_to_host):
             a_list=soup.findAll('a')
             for a in a_list:
                 href=a.get('href')
