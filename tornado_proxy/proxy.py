@@ -232,7 +232,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.write('Internal server error:\n')
                 self.finish()
             else:
-                logger.debug("request after urlredirect %s"% self.request)
+                logger.info("request after urlredirect %s"% self.request)
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
@@ -350,7 +350,7 @@ if __name__ == '__main__':
     else:
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     pwd = os.path.dirname(os.path.realpath(__file__))+'/'
 
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
