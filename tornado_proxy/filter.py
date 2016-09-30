@@ -17,26 +17,35 @@ class Myfilter:
         for rule in self.rules:
             if(rule.match(url)!=None): #in filter rules
                 filt_name=self.filter_regexs[rule.pattern]
-                return_body=getattr(self,filt_name)(response,**kwargs)
+                return_body=getattr(self,filt_name)(response,filt_name,**kwargs)
                 if(return_body!=None):
                     response_body=return_body
         return response_body
 
-
-
-    def filt_scholar(self,response): #scholar's filter
-            scihub_host=self.parser.get('scholar','scihub_host')
-            soup=BeautifulSoup(response.body,"html.parser")
-
-#replace all real_shcolar_host to self_scholar_host
+    def _replace_host(soup,real_host,replace_to_host):
             a_list=soup.findAll('a')
             for a in a_list:
                 href=a.get('href')
                 if(href!=None):
-                    a['href']=href.replace(self.parser.get('scholar',\
-                        'real_scholar_host'),self.parser.get('scholar',\
-                            'self_scholar_host'))
+                    a['href']=href.replace(real_host,replace_to_host)
 
+
+    def filt_ipv4(self,response,filt_name,**kwards): #url replace for ipv4.google.com
+            soup=BeautifulSoup(response.body,"html.parser")
+
+#replace all real_shcolar_host to self_scholar_host
+            self._replace_host(soup,self.parser.get(filt_name,\
+                        'real_host'),self.parser.get(filt_name,\
+                            'replace_to_host'))
+            return str(soup)
+    def filt_scholar(self,response,filt_name,**kwards): #scholar's filter
+            scihub_host=self.parser.get(filt_name,'scihub_host')
+            soup=BeautifulSoup(response.body,"html.parser")
+
+#replace all real_shcolar_host to self_scholar_host
+            self._replace_host(soup,self.parser.get(filt_name,\
+                        'real_host'),self.parser.get(filt_name,\
+                            'replace_to_host'))
             answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return
@@ -67,7 +76,7 @@ class Myfilter:
                 more_a.insert_after(down_a)
             return str(soup) #response.body can't change,so return it
 
-    def filt_scihub(self,response):
+    def filt_scihub(self,response,filt_name):
         #if('location' in response.request.headers):
         #    None
         if(response.body==None):
@@ -83,7 +92,7 @@ class Myfilter:
         if(len(save)==0): #not in download page
             return
 #There is in download page
-        new_download_html=open(self.workdir+self.parser.get('scholar','download_html')).read()
+        new_download_html=open(self.workdir+self.parser.get(filt_name,'download_html')).read()
         new_download_soup=BeautifulSoup(new_download_html,'html.parser')
 
         new_download_soup.iframe['src']=soup.iframe['src']
