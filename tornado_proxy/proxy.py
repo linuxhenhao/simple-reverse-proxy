@@ -236,7 +236,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
-                headers=self.request.headers, follow_redirects=True,
+                headers=self.request.headers, follow_redirects=False,
                 allow_nonstandard_methods=True)
         except tornado.httpclient.HTTPError as e:
             if hasattr(e, 'response') and e.response:
