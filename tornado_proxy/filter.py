@@ -39,6 +39,15 @@ class Myfilter:
                             'replace_to_host'))
             return str(soup)
     def filt_scholar(self,response,filt_name,**kwards): #scholar's filter
+#In some situation,google will use 302 to location to ipv4.google.com
+#to do a humanbeing check, we should do some hooks in the response headers
+            origin_location=response.headers.pop('Location',False)
+            if(origin_location): #has  Location section
+                new_location='Location:'+origin_location.replace(\
+                        self.parser.get('filt_ipv4','real_host'),\
+                        self.parser.get('filt_ipv4','replace_to_host'))
+                response.headers.parse_line(new_location)
+
             scihub_host=self.parser.get(filt_name,'scihub_host')
             soup=BeautifulSoup(response.body,"html.parser")
 
