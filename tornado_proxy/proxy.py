@@ -351,7 +351,7 @@ if __name__ == '__main__':
     else:
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
-    #logger.setLevel(logging.INFO)
+    logger.setLevel(logging.INFO)
     pwd = os.path.dirname(os.path.realpath(__file__))+'/'
 
     print ("Starting HTTP proxy on %s port %d" % (ip,port))

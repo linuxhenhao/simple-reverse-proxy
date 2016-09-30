@@ -31,6 +31,8 @@ class Myfilter:
 
 
     def filt_ipv4(self,response,filt_name,**kwards): #url replace for ipv4.google.com
+            if(response.body==None or len(response.body)<10):
+                return
             soup=BeautifulSoup(response.body,"html.parser")
 
 #replace all real_shcolar_host to self_scholar_host
