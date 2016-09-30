@@ -160,7 +160,8 @@ class ProxyHandler(tornado.web.RequestHandler):
 
 
         def handle_response(response):
-            if (response.error):
+            if (response.error and not \
+                    isinstance(response.error, tornado.httpclient.HTTPError)):
                 self.set_status(500)
                 self.write('Internal server error:\n' + str(response.error))
             else:
