@@ -41,6 +41,7 @@ class Myfilter:
             self._replace_host(soup,self.parser.get(filt_name,\
                         'real_host'),self.parser.get(filt_name,\
                             'replace_to_host'))
+            print str(soup)
             return str(soup)
     def filt_scholar(self,response,filt_name,**kwards): #scholar's filter
 #In some situation,google will use 302 to location to ipv4.google.com
