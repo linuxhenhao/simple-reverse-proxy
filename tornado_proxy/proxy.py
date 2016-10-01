@@ -166,15 +166,15 @@ class ProxyHandler(tornado.web.RequestHandler):
 
         def handle_response(response):
             logger.info('>>>in handle response')
-            logger.info('>>>response error %s'% response.error)
-            logger.info('>>>response body %s'% response.body)
             if (response.error and not \
                     isinstance(response.error, tornado.httpclient.HTTPError)):
                 self.set_status(500)
                 self.write('Internal server error:\n' + str(response.error))
             else:
+                logger.info('>>>in else')
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
+                logger.info('>>>before filt_content')
                 response_body=self.filter.filt_content(self.url_before_selfresolve,response)
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
