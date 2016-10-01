@@ -35,13 +35,11 @@ class Myfilter:
             if(response.body==None or len(response.body)<10):
                 return
             soup=BeautifulSoup(response.body,"html.parser")
-            print 'after soup build in filt_ipv4'
 
 #replace all real_shcolar_host to self_scholar_host
             self._replace_host(soup,self.parser.get(filt_name,\
                         'real_host'),self.parser.get(filt_name,\
                             'replace_to_host'))
-            print str(soup)
             return str(soup)
     def filt_scholar(self,response,filt_name,**kwards): #scholar's filter
 #In some situation,google will use 302 to location to ipv4.google.com

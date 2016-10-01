@@ -181,6 +181,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
 
                 if response_body:
+                    logger.info('>>>before write response body')
                     self.set_header('Content-Length', len(response_body))
                     self.write(response_body)
             self.finish()
