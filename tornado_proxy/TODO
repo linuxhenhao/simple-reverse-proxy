@@ -8,3 +8,12 @@ return the bot check image and other content, the HTTPResponse.code
 is 503.
 /////Tornado think this is an erro and abort the fetch work,
 /////SOLVE THIS!!!
+
+test url:
+http://ipv4.thinkeryu.com/sorry/IndexRedirect?continue=https://scholar.google.com/&q=CGMSBC0gNfEYw-e3vwUiGQDxp4NL89qc5EbOuVmCLY-ahywAzc5W6pY
+
+error message:
+ERROR:tornado.access:503 GET https://ipv4.google.com/sorry/IndexRedirect?continue=https://scholar.google.com/&q=CGMSBC0gNfEYw-e3vwUiGQDxp4NL89qc5EbOuVmCLY-ahywAzc5W6pY (1.83.124.40) 423.35ms
+
+
+

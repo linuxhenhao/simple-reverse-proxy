@@ -165,6 +165,9 @@ class ProxyHandler(tornado.web.RequestHandler):
 
 
         def handle_response(response):
+            logger.info('>>>in handle response')
+            logger.info('>>>response error %s'% response.error)
+            logger.info('>>>response body %s'% response.body)
             if (response.error and not \
                     isinstance(response.error, tornado.httpclient.HTTPError)):
                 self.set_status(500)
