@@ -2,4 +2,10 @@
 /build/
 /dist/
 /doc/_build/
+/bin
+/lib
+/local
+/include
+/share
+
 *.pyc
