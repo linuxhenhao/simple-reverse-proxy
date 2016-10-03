@@ -15,9 +15,12 @@ def replace_to_selfhost(origin_url,to_selfhost_rules):
     rules like dict{'original_host':selfhost_url,}
     original_host include port if it has
     '''
-    host,just_after_host_position=get_host_from_url(origin_url)
-    returen to_selfhost_rules[host]+\
+    try:
+        host,just_after_host_position=get_host_from_url(origin_url)
+        return to_selfhost_rules[host]+ \
             origin_url[just_after_host_position:]
+    except:
+        return None
 
 def replace_to_originalhost(selfhost_url,to_original_rules):
     '''replace the selfhost url to original real url
@@ -25,9 +28,12 @@ def replace_to_originalhost(selfhost_url,to_original_rules):
     rules like dict{'selfhost':original_url,}
     selfhost also include port if it exist
     '''
-    host,just_after_host_position=get_host_from_url(selfhost_url)
-    returen to_original_rules[host]+\
-            selfhost_url[just_after_host_position:]
+    try:
+        host,just_after_host_position=get_host_from_url(selfhost_url)
+        return to_original_rules[host]+\
+                selfhost_url[just_after_host_position:]
+    except:
+        return None
 
 def get_host_from_url(url):
     '''url may like //host[:port]/xxxx
@@ -47,6 +53,3 @@ def get_host_from_url(url):
         if(dot_position < len(host_without_port)-1):
             return host,just_after_host_position
     raise HostNotFoundError(url)
-
-
-
