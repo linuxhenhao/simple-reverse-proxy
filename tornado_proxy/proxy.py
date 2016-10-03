@@ -31,6 +31,7 @@ import sys
 import socket
 from urlparse import urlparse
 import filter,re
+import util,config
 from MyConfigParser import RawConfigParser
 
 import tornado.httpserver
@@ -187,7 +188,7 @@ class ProxyHandler(tornado.web.RequestHandler):
             self.finish()
 
         def redirect_before_fetch(host):
-            for re_pattern,target in self.pattern_target_list:
+            in self.pattern_target_list:
                 match_result=re_pattern.match(url)
                 if(match_result!=None): # matched
                     target_url=get_target_url_by_pattern_result(match_result,target)
@@ -327,19 +328,14 @@ class ProxyHandler(tornado.web.RequestHandler):
             upstream.connect((host, int(port)), start_tunnel)
 
 
-def run_proxy(port, address, workdir ,config_file_path, regexs_section,start_ioloop=True):
+def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     """
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
     """
-    parser=RawConfigParser()
-    parser.read(workdir+config_file_path)
-    filter_regexs=config2dict(parser,regexs_section)
 
-    add_server_name_compiled_list_to_parser(parser)
-    #now parser.server_name_compiled_list exists
 
-    myfilter=filter.Myfilter(filter_regexs,parser,workdir)
+    myfilter=filter.Myfilter(configurations,workdir)
     app = tornado.web.Application([
         (r'.*', ProxyHandler,dict(parser=parser,Myfilter=myfilter)),
     ])
@@ -362,6 +358,6 @@ if __name__ == '__main__':
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
     logger.setLevel(logging.INFO)
     pwd = os.path.dirname(os.path.realpath(__file__))+'/'
-
+    configurations = config.all_configuration #get all configrations in config.py
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
-    run_proxy(port,ip,pwd,"site.conf",'regexs')
+    run_proxy(port,ip,pwd,configurations)

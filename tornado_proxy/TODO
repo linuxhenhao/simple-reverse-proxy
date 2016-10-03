@@ -23,7 +23,7 @@ The problem above seems to be solved,test another time
 
 ----------------
 new
-1. using config.py to replace the site.conf to enable more
+done 1. using config.py to replace the site.conf to enable more
 flexiable and more complex configuration
 2. add https support option in configartion
 3. implement an http to https redirect location handler, only

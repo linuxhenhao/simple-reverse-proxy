@@ -2,62 +2,78 @@
 #-*- coding: utf-8 -*-
 # filters to modify the http headers and response body
 import re
+import util
 from bs4 import BeautifulSoup
 
 class Myfilter:
-    def __init__(self,filter_regexs,parser,workdir):
-        self.parser=parser #site.conf file parser
-        self.workdir=workdir
-        print filter_regexs
-        self.filter_regexs=filter_regexs
-        self.rules=[re.compile(i) for i in filter_regexs.keys()]
+    def __init__(self,configurations,workdir):
+        self._workdir = workdir
+        self._configurations = configurations
+        self._regexs4select_filter = configurations.regexs4select_filter
+        self._replace_to_selfhost_rules = configurations.replace_to_selfhost_rules
+        self._host_proto = configrations.host_proto
+
+        self._set_configs_for_all_filters() #set self._filt_name_configs if exists
+
+    def _set_configs_for_all_filters(self):
+        self._filters_configs = dict()
+        for filter_name in self._regexs4select_filter.values:
+            config = self._configurations.get_configs_for_filter(filter_name)
+            if(config != None): #has configs for the filter_name
+                self._filters_configs[filter_name] = config
 
     def filt_content(self,url,response,**kwargs):
+        self._location_header_replace() #replace host in headers's location if exists
         response_body=response.body
-        for rule in self.rules:
-            if(rule.match(url)!=None): #in filter rules
-                filt_name=self.filter_regexs[rule.pattern]
-                return_body=getattr(self,filt_name)(response,filt_name,**kwargs)
+        for url_pattern in self._regexs4select_filter.keys():
+            if(url_pattern.match(url)!=None): #in filter rules
+                filt_name = self.regexs4select_filter[url_pattern]
+                if(self._filters_configs.has_key(filt_name)):
+                    return_body = getattr(self,filt_name)(response,\
+                        self._filters_configs[filt_name], **kwargs)
+                else:
+                    return_body = getattr(self,filt_name)(response,**kwargs)
                 if(return_body!=None):
                     response_body=return_body
         return response_body
 
-    def _replace_host(self,soup,real_host,replace_to_host):
+    def _location_header_replace(self,response):
+#In some situation,google will use 302 to location to ipv4.google.com
+#to do a humanbeing check, we should do some hooks in the response headers
+            origin_location_url=response.headers.pop('Location',False)
+            if(origin_location_url): #has  Location section
+                replaced_url =  util.replace_to_selfhost(origin_location_url,self._replace_to_selfhost_rules)
+                if (replaced_url != None): #replaced successfully,has corresponding host in rules
+                    new_location='Location:'+ replaced_url
+                response.headers.parse_line(new_location)
+
+    def _replace_host(self,soup):
             a_list=soup.findAll('a')
             for a in a_list:
                 href=a.get('href')
                 if(href!=None):
-                    a['href']=href.replace(real_host,replace_to_host)
+                    replaced_url = util.replace_to_selfhost(href,self._replace_to_selfhost_rules)
+                    if(replaced_url != None ):
+                    a['href'] = replaced_url
 
 
-    def filt_ipv4(self,response,filt_name,**kwards): #url replace for ipv4.google.com
+    def filt_ipv4(self,response,filt_configs=None,**kwards): #url replace for ipv4.google.com
 
             if(response.body==None or len(response.body)<10):
                 return
             soup=BeautifulSoup(response.body,"html.parser")
 
 #replace all real_shcolar_host to self_scholar_host
-            self._replace_host(soup,self.parser.get(filt_name,\
-                        'real_host'),self.parser.get(filt_name,\
-                            'replace_to_host'))
+            self._replace_host(soup)
             return str(soup)
-    def filt_scholar(self,response,filt_name,**kwards): #scholar's filter
-#In some situation,google will use 302 to location to ipv4.google.com
-#to do a humanbeing check, we should do some hooks in the response headers
-            origin_location=response.headers.pop('Location',False)
-            if(origin_location): #has  Location section
-                new_location='Location:'+origin_location.replace(\
-                        self.parser.get('filt_ipv4','real_host'),\
-                        self.parser.get('filt_ipv4','replace_to_host'))
-                response.headers.parse_line(new_location)
+    def filt_scholar(self,response,filt_configs=None,**kwards): #scholar's filter
 
-            scihub_host=self.parser.get(filt_name,'scihub_host')
+
+            scihub_host=filt_configs['scihub_host']
             soup=BeautifulSoup(response.body,"html.parser")
 
 #replace all real_shcolar_host to self_scholar_host
-            self._replace_host(soup,self.parser.get(filt_name,\
-                        'real_host'),self.parser.get(filt_name,\
-                            'replace_to_host'))
+            self._replace_host(soup)
             answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return
@@ -81,14 +97,14 @@ class Myfilter:
 #generate new tag to add after more
                 down_a=soup.new_tag('a')
                 down_a.string=u"下载"
-                down_a['href']="http://"+scihub_host+'/'+res_url
+                down_a['href']=self._host_proto + '://' + scihub_host+'/'+res_url
                 down_a['class']="gs_nph"
                 down_a['target']='_blank' #open in new tab
                 #insert the down_a after more_a
                 more_a.insert_after(down_a)
             return str(soup) #response.body can't change,so return it
 
-    def filt_scihub(self,response,filt_name):
+    def filt_scihub(self,response,filt_configs=None,**kwargs):
         #if('location' in response.request.headers):
         #    None
         if(response.body==None):
@@ -104,7 +120,7 @@ class Myfilter:
         if(len(save)==0): #not in download page
             return
 #There is in download page
-        new_download_html=open(self.workdir+self.parser.get(filt_name,'download_html')).read()
+        new_download_html=open(self.workdir+filt_configs['download_html']).read()
         new_download_soup=BeautifulSoup(new_download_html,'html.parser')
 
         new_download_soup.iframe['src']=soup.iframe['src']
@@ -114,5 +130,3 @@ class Myfilter:
         save.a.string=u'下载链接'
         download_link_h3.insert(1,save.a)
         return str(new_download_soup)
-
-
