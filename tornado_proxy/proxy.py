@@ -78,6 +78,32 @@ def fetch_request(url, callback, **kwargs):
 
 
 
+class HttpHandler(tornado.web.RequestHandler):
+    SUPPORTED_METHODS = ['GET']
+
+    def compute_etag(self):
+        return None # disable tornado Etag
+
+    def is_in_hostlist(self): #check host before any further action
+        return self._replace_to_originalhost_rules.has_key(self.request.host)
+
+    @tornado.web.asynchronous
+    def get(self):
+
+        if(self.is_in_hostlist() == False):
+            self.finish()
+            return
+# complete all the uri from "GET /xxx" to "GET https?://host/xxx"
+        host_pattern=re.compile("(https?://)([^/]+)")
+        match_result=host_pattern.match(self.request.uri)
+        if(match_result==None): #no host info in uri,add it
+            self.request.uri=self.request.protocol+"://"+self.request.host+self.request.uri
+
+        logger.debug('redirect http request %s to https'% self.request.uri)
+        self._headers = tornado.httputil.HTTPHeaders()
+        self.set_status(301)
+        self.set_header('Location' , self.request.uri.replace('http','https',1))
+        self.finish()
 
 
 
@@ -112,15 +138,6 @@ class ProxyHandler(tornado.web.RequestHandler):
         match_result=host_pattern.match(self.request.uri)
         if(match_result==None): #no host info in uri,add it
             self.request.uri=self.request.protocol+"://"+self.request.host+self.request.uri
-
-        if(self._https_enabled and self.request.protocol.lower() == 'http' ):
-            #https enabled and the request is in http protocol
-            logger.debug('redirect http request %s to https'% self.request.uri)
-            self._headers = tornado.httputil.HTTPHeaders()
-            self.set_status(301)
-            self.set_header('Location' , self.request.uri.replace('http','https',1))
-            self.finish()
-            return
 
 
         logger.debug('Handle %s request to %s', self.request.method,
@@ -304,7 +321,7 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     if(configurations.https_enabled): #https_enabled
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
-        (r'.*', ProxyHandler,handler_initialize_dict)
+        (r'.*', HttpHandler)
         ])
 
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
