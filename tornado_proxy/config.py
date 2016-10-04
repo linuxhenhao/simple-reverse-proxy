@@ -26,7 +26,7 @@ scihub_self = 'scihub.thinkeryu.com'
 
 rules_source = [
 ('https://scholar.google.com', 'scholar.thinkeryu.com'),
-('https://ipv4.google.com',' ipv4.thinkeryu.com'),
+('https://ipv4.google.com','ipv4.thinkeryu.com'),
 ('http://sci-hub.bz', scihub_self)
 ]
 
