@@ -7,5 +7,5 @@
 /local
 /include
 /share
-
+*.pem
 *.pyc

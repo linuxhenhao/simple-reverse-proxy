@@ -57,11 +57,6 @@ def parse_proxy(proxy):
     proxy_parsed = urlparse(proxy, scheme='http')
     return proxy_parsed.hostname, proxy_parsed.port
 
-def config2dict(parser,section): #parser is a configParser object
-    dic=dict()
-    for filt_name,regex in parser.items(section):
-        dic[regex]=filt_name
-    return dic
 
 def fetch_request(url, callback, **kwargs):
     proxy = get_proxy(url)
@@ -82,58 +77,10 @@ def fetch_request(url, callback, **kwargs):
     except e:
         print e
 
-def get_host(url):
-    #url is something like http://www.baidu.com/word?
-    items=url.split('/')  #[http,'',host,uri] 2 is host
-    if(items[0].find('http')!=-1): #found 'http'
-        try:
-            return items[2]
-        except:
-            logger.debug('url format error when get_host')
-            return None
 
 
-def get_target_url_by_pattern_result(pattern_result,target_val):
-    # pattern results is re.match's result
-    # target val is a target url that using $number as signature for replace by pattern result
-    signature_position_list=list()
-    target_val_length_minus1=len(target_val)-1
-    position=target_val.find('$')
 
-    while(position!=-1):
-        signature_position_list.append(position)
-        if(position==target_val_length_minus1):
-            break
-        position=target_val.find('$',position+1)
 
-    signature_position_list_length=len(signature_position_list)
-    if(signature_position_list_length%2!=0):
-        logger.debug('counts of $ in url_redirect rule don\'t match')
-        return None
-
-    number=int(target_val[ signature_position_list[0]+1 : signature_position_list[1] ])
-    target_url=target_val[ :signature_position_list[0] ]+pattern_result.groups()[number]
-    for i in xrange(2,signature_position_list_length,2):
-        number=int(target_val[ signature_position_list[i]+1 : signature_position_list[i+1]])
-        target_url+=target_val[ signature_position_list[i-1]+1: signature_position_list[i]]+pattern_result.groups()[number]
-
-    if(signature_position_list[-1]!=target_val_length_minus1):
-        target_url+=target_val[signature_position_list[-1]+1:]
-
-    return target_url
-
-def add_server_name_compiled_list_to_parser(parser):
-    server_name_list=parser.items('server_name')
-    parser.server_name_compiled_list=list()
-    for k,v in server_name_list:
-        parser.server_name_compiled_list.append(re.compile(v))
-
-def is_server_name_right(compiled_server_name_list,request_host):
-    for re_server_pattern in compiled_server_name_list:
-        if(re_server_pattern.match(request_host)):
-            return True
-        else:
-            return False
 
 class ProxyHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET', 'POST', 'CONNECT']
@@ -141,16 +88,30 @@ class ProxyHandler(tornado.web.RequestHandler):
     #@tornado.web.RequestHandler.initialize
 #add custom config to this class
 #add config=file_path to handler
-    def initialize(self, rules, selfresolve, Myfilter):
+    def initialize(self, rules, selfresolve, Myfilter, https_enabled):
         ProxyHandler._filter=Myfilter
         ProxyHandler._replace_to_originalhost_rules = rules
         ProxyHandler._selfresolve = selfresolve
+        ProxyHandler._https_enabled = https_enabled
 
     def compute_etag(self):
         return None # disable tornado Etag
 
     @tornado.web.asynchronous
     def get(self):
+# complete all the uri from "GET /xxx" to "GET https?://host/xxx"
+        host_pattern=re.compile("(https?://)([^/]+)")
+        match_result=host_pattern.match(self.request.uri)
+        if(match_result==None): #no host info in uri,add it
+            self.request.uri=self.request.protocol+"://"+self.request.host+self.request.uri
+
+        if(self._https_enabled and self.request.protocol.lower() == 'http' ):
+            #https enabled and the request is in http protocol
+            logger.debug('redirect http request %s to https'% self.request.uri)
+            self._headers = tornado.httputil.HTTPHeaders()
+            self.set_status(301)
+            self.set_header['Location'] = self.request.uri.replace('http','https',1)
+            self.finish()
 
 
         logger.debug('Handle %s request to %s', self.request.method,
@@ -220,11 +181,6 @@ class ProxyHandler(tornado.web.RequestHandler):
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
 
-# complete all the uri from "GET /xxx" to "GET https?://host/xxx"
-            host_pattern=re.compile("(https?://)([^/]+)")
-            match_result=host_pattern.match(self.request.uri)
-            if(match_result==None): #no host info in uri,add it
-                self.request.uri=self.request.protocol+"://"+self.request.host+self.request.uri
 
 #do redirect before fetch request
 #to detect whether the request host is in redirect config rules
@@ -332,7 +288,7 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
         (r'.*', ProxyHandler,dict(rules=configurations.replace_to_originalhost_rules,\
-         selfresolve=configurations.selfresolve, Myfilter=myfilter)),
+         selfresolve=configurations.selfresolve, Myfilter=myfilter, https_enabled=configurations.https_enabled)),
         ])
 
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)

@@ -7,8 +7,9 @@
 import re,util
 
 https_enabled = True
-fullchain_cert_path = ''
-private_key_path = ''
+pwd = os.path.dirname(os.path.realpath(__file__))+'/'
+fullchain_cert_path = pwd+'fullchain1.pem'
+private_key_path = pwd+'private1.pem'
 server_name = '.*thinkeryu.com' #using in add_handler's host pattern for virtual host
 #url replace rules
 scihub_self = 'scihub.thinkeryu.com'
