@@ -128,6 +128,7 @@ class ProxyHandler(tornado.web.RequestHandler):
         return None # disable tornado Etag
 
     def is_in_hostlist(self): #check host before any further action
+        logger.debug("ProxyHandler is_in_hostlist host:%s"%self.request.host)
         return self._replace_to_originalhost_rules.has_key(self.request.host)
 
 
@@ -194,6 +195,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 if(self._selfresolve.has_key(host_without_port)): # request host in selfresolve dict
                     ip_addr = self._selfresolve[host_without_port]
                     self.request.uri = self.request.uri.replace(host_without_port, ip_addr)
+                logger.debug("request after redirect>>>\n %s" % self.request)
 
                 return True #if program runs to selfresolve step, always return True,url redirect finishied
 
