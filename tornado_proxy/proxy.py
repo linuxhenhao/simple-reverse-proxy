@@ -120,6 +120,7 @@ class ProxyHandler(tornado.web.RequestHandler):
             self.set_status(301)
             self.set_header('Location' , self.request.uri.replace('http','https',1))
             self.finish()
+            return
 
 
         logger.debug('Handle %s request to %s', self.request.method,
