@@ -3,6 +3,7 @@
 # filters to modify the http headers and response body
 import re
 import util
+from proxy import logger
 from bs4 import BeautifulSoup
 
 class Myfilter:
@@ -58,6 +59,7 @@ class Myfilter:
 
 
     def filt_ipv4(self,response,filt_configs=None,**kwards): #url replace for ipv4.google.com
+            logger.debug("In filt_ipv4 response.body>>>\n%s"%response.body)
 
             if(response.body==None or len(response.body)<10):
                 return
