@@ -97,8 +97,16 @@ class ProxyHandler(tornado.web.RequestHandler):
     def compute_etag(self):
         return None # disable tornado Etag
 
+    def is_in_hostlist(self): #check host before any further action
+        return self._replace_to_originalhost_rules.has_key(self.request.host)
+
+
     @tornado.web.asynchronous
     def get(self):
+
+        if(self.is_in_hostlist == False):
+            self.finish()
+            return
 # complete all the uri from "GET /xxx" to "GET https?://host/xxx"
         host_pattern=re.compile("(https?://)([^/]+)")
         match_result=host_pattern.match(self.request.uri)
@@ -213,6 +221,9 @@ class ProxyHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def connect(self):
 
+        if(self.is_in_hostlist == False):
+            self.finish()
+            return
         logger.debug('Start CONNECT to %s', self.request.uri)
         host, port = self.request.uri.split(':')
         client = self.request.connection.stream
