@@ -220,7 +220,7 @@ class ProxyHandler(tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def connect(self):
-
+        logger.debug('request to %s of request.uri %s'% (self.request.host, self.request.uri))
         if(self.is_in_hostlist() == False):
             self.finish()
             return
