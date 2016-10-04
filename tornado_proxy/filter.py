@@ -27,7 +27,7 @@ class Myfilter:
         response_body=response.body
         self._location_header_replace(response) #replace host in headers's location if exists
         if(self._get_content_type_from_response(response) != 'text/html'):
-            return reponse_body
+            return response_body
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
                 filt_name = self._regexs4select_filter[url_pattern]
@@ -40,7 +40,7 @@ class Myfilter:
                     response_body=return_body
         return response_body
     def _get_content_type_from_response(self,response):
-        content_type = reponse.headers.pop('Content-Type',False)
+        content_type = response.headers.pop('Content-Type',False)
         if(content_type != False): #get content_type
             response.headers.parse_line('Content-Type:'+content_type) #add back to response
             return content_type
