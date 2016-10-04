@@ -27,7 +27,7 @@ class Myfilter:
         response_body=response.body
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
-                filt_name = self.regexs4select_filter[url_pattern]
+                filt_name = self._regexs4select_filter[url_pattern]
                 if(self._filters_configs.has_key(filt_name)):
                     return_body = getattr(self,filt_name)(response,\
                         self._filters_configs[filt_name], **kwargs)
@@ -120,7 +120,7 @@ class Myfilter:
         if(len(save)==0): #not in download page
             return
 #There is in download page
-        new_download_html=open(self.workdir+filt_configs['download_html']).read()
+        new_download_html=open(self._workdir+filt_configs['download_html']).read()
         new_download_soup=BeautifulSoup(new_download_html,'html.parser')
 
         new_download_soup.iframe['src']=soup.iframe['src']
