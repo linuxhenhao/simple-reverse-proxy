@@ -347,7 +347,9 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
         ioloop.start()
 
 if __name__ == '__main__':
-    logger.setLevel(logging.ERROR)
+    loglevel = logging.ERROR
+    logger.setLevel(loglevel)
+    tornado.web.gen_log.setLevel(loglevel)
     pwd = os.path.dirname(os.path.realpath(__file__))+'/'
     configurations = config.all_configuration #get all configrations in config.py
     if(os.getenv('OPENSHIFT_PYTHON_IP')==None):
