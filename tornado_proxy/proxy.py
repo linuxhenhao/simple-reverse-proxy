@@ -159,6 +159,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                         self.request.headers['Referer'] = target_referer
 
                 #selfresolve
+                self.url_before_selfresolve = self.request.uri
                 host_without_port = host.split(":")[0]
                 if(self._selfresolve.has_key(host_without_port)): # request host in selfresolve dict
                     ip_addr = self._selfresolve[host_without_port]
