@@ -88,6 +88,7 @@ class HttpHandler(tornado.web.RequestHandler):
         return None # disable tornado Etag
 
     def is_in_hostlist(self): #check host before any further action
+        logger.debug('HttpHandler is_in_hostlist host:%s'%self.request.host)
         return self._replace_to_originalhost_rules.has_key(self.request.host)
 
     @tornado.web.asynchronous
