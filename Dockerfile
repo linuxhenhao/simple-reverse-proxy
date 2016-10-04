@@ -2,6 +2,9 @@ FROM alpine
 
 MAINTAINER Yu Huang
 
+WORKDIR /etc/
+RUN touch INDOCKER
+
 WORKDIR /root/
 RUN apk update
 RUN apk add python
@@ -13,4 +16,5 @@ RUN pip install -r tornado_proxy/requirements.txt
 
 CMD python /root/tornado_proxy/tornado_proxy/proxy.py
 
-EXPOSE 8888 
+EXPOSE 443
+EXPOSE 80

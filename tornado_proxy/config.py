@@ -8,12 +8,22 @@ import re,util
 import os
 
 https_enabled = True
+
 pwd = os.path.dirname(os.path.realpath(__file__))+'/'
-fullchain_cert_path = pwd+'fullchain1.pem'
-private_key_path = pwd+'privkey1.pem'
+
+if(os.path.exists('/etc/INDOCKER')): #in an docker container
+    pwd = '/etc/letsencrypt/archive/scholar.thinkeryu.com/'
+    fullchain_cert_path = pwd+'fullchain1.pem'
+    private_key_path = pwd+'privkey1.pem'
+else
+    fullchain_cert_path = pwd+'fullchain1.pem'
+    private_key_path = pwd+'privkey1.pem'
+
 server_name = '.*thinkeryu.com' #using in add_handler's host pattern for virtual host
+
 #url replace rules
 scihub_self = 'scihub.thinkeryu.com'
+
 rules_source = [
 ('https://scholar.google.com', 'scholar.thinkeryu.com'),
 ('https://ipv4.google.com',' ipv4.thinkeryu.com'),
