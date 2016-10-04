@@ -81,6 +81,9 @@ def fetch_request(url, callback, **kwargs):
 class HttpHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET']
 
+    def initialize(rules):
+        self._replace_to_originalhost_rules = rules
+
     def compute_etag(self):
         return None # disable tornado Etag
 
@@ -321,7 +324,7 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     if(configurations.https_enabled): #https_enabled
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
-        (r'.*', HttpHandler)
+        (r'.*', HttpHandler,dict(rules=configurations.replace_to_originalhost_rules))
         ])
 
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
