@@ -187,7 +187,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                     target_referer = util.replace_to_originalhost(self.request.headers['Referer'], \
                     self._replace_to_originalhost_rules)
                     if(target_referer != None): #replace ok
-                        self.request.headers['Referer'] = target_referer
+                        self.request.headers['Referer'] = 'https://scholar.google.com'#target_referer
 
                 #selfresolve
                 self.url_before_selfresolve = self.request.uri
