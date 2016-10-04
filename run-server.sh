@@ -1,5 +1,5 @@
 #!/bin/sh
-docker rmi scihub
+docker rmi -f scihub
 cd /root/tornado_proxy && git pull
 cp /root/tornado_proxy/Dockerfile /root/docker/
 

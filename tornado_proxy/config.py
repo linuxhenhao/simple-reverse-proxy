@@ -12,7 +12,7 @@ https_enabled = True
 pwd = os.path.dirname(os.path.realpath(__file__))+'/'
 
 if(os.path.exists('/etc/INDOCKER')): #in an docker container
-    pwd = '/etc/media/'
+    pwd = '/media/'
     fullchain_cert_path = pwd+'fullchain1.pem'
     private_key_path = pwd+'privkey1.pem'
 else:
