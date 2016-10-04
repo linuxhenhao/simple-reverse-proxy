@@ -93,7 +93,7 @@ class HttpHandler(tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def get(self):
-
+        logger.debug('Handle http request: %s'%self.request)
         if(self.is_in_hostlist() == False):
             self.finish()
             return
