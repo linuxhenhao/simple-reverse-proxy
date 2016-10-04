@@ -23,7 +23,7 @@ class Myfilter:
                 self._filters_configs[filter_name] = config
 
     def filt_content(self,url,response,**kwargs):
-        self._location_header_replace() #replace host in headers's location if exists
+        self._location_header_replace(response) #replace host in headers's location if exists
         response_body=response.body
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules

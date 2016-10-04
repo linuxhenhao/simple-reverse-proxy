@@ -104,7 +104,7 @@ class ProxyHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
 
-        if(self.is_in_hostlist == False):
+        if(self.is_in_hostlist() == False):
             self.finish()
             return
 # complete all the uri from "GET /xxx" to "GET https?://host/xxx"
@@ -221,7 +221,7 @@ class ProxyHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def connect(self):
 
-        if(self.is_in_hostlist == False):
+        if(self.is_in_hostlist() == False):
             self.finish()
             return
         logger.debug('Start CONNECT to %s', self.request.uri)
