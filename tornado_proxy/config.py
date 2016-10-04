@@ -7,7 +7,8 @@
 import re,util
 
 https_enabled = True
-
+fullchain_cert_path = ''
+private_key_path = ''
 server_name = '.*thinkeryu.com' #using in add_handler's host pattern for virtual host
 #url replace rules
 scihub_self = 'scihub.thinkeryu.com'
@@ -33,12 +34,14 @@ class getHostError(Exception):
         return repr(sefl.error_message)
 
 class configurations:
-    def __init__(self,https_enabled,server_name,rules_source,regexs,selfresolve,**kwargs):
+    def __init__(self,https_enabled, fullchain_cert_path, private_key_path, server_name,rules_source,regexs,selfresolve,**kwargs):
         self._https_enabled = https_enabled
         if(https_enabled):
             self._selfhost_proto = 'https'
         else:
             self._selfhost_proto = 'http'
+        self._fullchain_cert_path = fullchain_cert_path
+        self._private_key_path = private_key_path
         self._server_name = server_name
         self._rules_source = rules_source
         self._regexs4select_filter_source = regexs
@@ -48,11 +51,23 @@ class configurations:
         self._gen_configs_for_filters(**kwargs)
     @property
     def https_enabled(self):
-        return self._https_enabled
+        copy = self._https_enabled
+        return copy
+
+    @property
+    def fullchain_cert_path(self):
+        copy = self._fullchain_cert_path
+        return copy
+
+    @property
+    def fullchain_cert_path(self):
+        copy = self._private_key_path
+        return copy
 
     @property
     def host_proto(self):
-        return self._selfhost_proto
+        copy = self._selfhost_proto
+        return copy
 
     @property
     def selfresolve(self):
@@ -60,7 +75,8 @@ class configurations:
 
     @property
     def server_name(self):
-        return self._server_name
+        copy = self._server_name
+        return server_name
 
     @property
     def regexs4select_filter(self):
@@ -104,5 +120,5 @@ class configurations:
             if(kwargs.has_key(filter_name+'_configs')):
                 setattr(self, "_"+filter_name, kwargs[filter_name+'_configs'])
 
-all_configuration = configurations(https_enabled,server_name,rules_source,regexs4select_filter_source,selfresolve, \
+all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path,server_name,rules_source,regexs4select_filter_source,selfresolve, \
                 filt_scholar_configs=filt_scholar_configs,filt_scihub_configs=filt_scihub_configs)

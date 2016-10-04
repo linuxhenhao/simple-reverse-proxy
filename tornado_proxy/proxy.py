@@ -29,6 +29,7 @@ import logging
 import os
 import sys
 import socket
+import ssl
 from urlparse import urlparse
 import filter,re
 import util,config
@@ -140,13 +141,10 @@ class ProxyHandler(tornado.web.RequestHandler):
     #@tornado.web.RequestHandler.initialize
 #add custom config to this class
 #add config=file_path to handler
-    def initialize(self,parser,Myfilter):
-        ProxyHandler.filter=Myfilter
-        ProxyHandler.parser=parser
-        ProxyHandler.pattern_target_list=list()
-        key_val_list=self.parser.items('url_redirect')
-        for key,val in key_val_list:
-            ProxyHandler.pattern_target_list.append((re.compile(key),val))
+    def initialize(self, rules, selfresolve, Myfilter):
+        ProxyHandler._filter=Myfilter
+        ProxyHandler._replace_to_originalhost_rules = rules
+        ProxyHandler._selfresolve = selfresolve
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -170,7 +168,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
                 logger.info('>>>before filt_content')
-                response_body=self.filter.filt_content(self.url_before_selfresolve,response)
+                response_body=self._filter.filt_content(self.url_before_selfresolve,response)
                 for header, v in response.headers.get_all():
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
@@ -182,30 +180,29 @@ class ProxyHandler(tornado.web.RequestHandler):
             self.finish()
 
         def redirect_before_fetch(host):
-            in self.pattern_target_list:
-                match_result=re_pattern.match(url)
-                if(match_result!=None): # matched
-                    target_url=get_target_url_by_pattern_result(match_result,target)
-                    if(target_url!=None):
-                        self.request.uri=target_url
-                        self.url_before_selfresolve=target_url
+            #util.replace_to_originalhost will replace the selfhost to original host if in rules
+            target_url = util.replace_to_originalhost(self.request.uri, self._replace_to_originalhost_rules)
+            if(target_url !=None): #has corresponding target host in rules, successfully replaced
+                self.request.uri = target_url
 
-                        target_host=get_host(target_url)
-                        if(target_host!=None):
-                            self.request.host=self.request.headers['Host']=target_host
-                             #request.headers['Host'] is different form request.host
+                #replace self.request.headers['Host']
+                target_host,trash = util.get_host_from_url(self._replace_to_originalhost_rules[self.request.host])
+                self.request.headers['Host'] = target_host
 
-                            splited_host=target_host.split(":")
-                            host_without_port=splited_host[0]
-                            if(self.parser.has_option('selfresolve',host_without_port)):
-                            #dispite the effects of port in host section
-                                real_host=self.parser.get('selfresolve',host_without_port)
-                                self.request.uri=target_url.replace(host_without_port,real_host)
-                                self.request.host=target_host.replace(host_without_port,real_host)
+                #replace host in referer
+                if('Referer' in self.request.headers): #delete Referer in headers
+                    target_referer = util.replace_to_originalhost(self.request.headers['Referer'], \
+                    self._replace_to_originalhost_rules)
+                    if(target_referer != None): #replace ok
+                        self.request.headers['Referer'] = target_referer
 
-                            if('Referer' in self.request.headers): #delete Referer in headers
-                                del self.request.headers['Referer']
-                            return True #if program runs to selfresolve step, always return True,url redirect finishied
+                #selfresolve
+                host_without_port = host.split(":")[0]
+                if(self._selfresolve.has_key(host_without_port)): # request host in selfresolve dict
+                    ip_addr = self._selfresolve[host_without_port]
+                    self.request.uri = self.request.uri.replace(host_without_port, ip_addr)
+
+                return True #if program runs to selfresolve step, always return True,url redirect finishied
 
             return False
 
@@ -326,28 +323,50 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
 
     myfilter=filter.Myfilter(configurations,workdir)
     app = tornado.web.Application()
-    app.add_handlers(r'.*thinkeryu.com',[
-    (r'.*', ProxyHandler,dict(parse=,Myfilter=myfilter)),
+    app.add_handlers(configurations.server_name, [
+    (r'.*', ProxyHandler,dict(rules=configurations.replace_to_originalhost_rules,\
+     selfresolve=configurations.selfresolve, Myfilter=myfilter)),
     ])
-    if(address==None):
-        app.listen(port)
+
+    if(configurations.https_enabled): #https_enabled
+        app4redirect2https = tornado.web.Application()
+        app4redirect2https.add_handlers(configurations.server_name, [
+        (r'.*', ProxyHandler,dict(rules=configurations.replace_to_originalhost_rules,\
+         selfresolve=configurations.selfresolve, Myfilter=myfilter)),
+        ])
+
+        ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_ctx.load_cert_chain(os.path.join(data_dir, "mydomain.crt"),
+        os.path.join(data_dir, "mydomain.key"))
+        if(address==None):
+            app.listen(port, ssl_options = ssl_ctx)
+            app4redirect2https.listen(80)
+        else:
+            app.listen(port,address, ssl_options = ssl_ctx)
+            app4redirect2https.listen(80, address)
     else:
-        app.listen(port,address)
+        if(address == None):
+            app.listen(port)
+        else:
+            app.listen(port,address)
     ioloop = tornado.ioloop.IOLoop.instance()
     if start_ioloop:
         ioloop.start()
 
 if __name__ == '__main__':
+    logger.setLevel(logging.INFO)
+    pwd = os.path.dirname(os.path.realpath(__file__))+'/'
+    configurations = config.all_configuration #get all configrations in config.py
     if(os.getenv('OPENSHIFT_PYTHON_IP')==None):
         ip='0.0.0.0'
-        port = 8888
+        if(configurations.https_enabled):
+            port = 443
+        else:
+            port = 80
         if len(sys.argv) > 1:
             port = int(sys.argv[1])
     else:
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
-    logger.setLevel(logging.INFO)
-    pwd = os.path.dirname(os.path.realpath(__file__))+'/'
-    configurations = config.all_configuration #get all configrations in config.py
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
     run_proxy(port,ip,pwd,configurations)

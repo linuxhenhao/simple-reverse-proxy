@@ -30,5 +30,5 @@ done 2. add https support option in configartion
 3. implement an http to https redirect location handler, only
 handle get method
 
-4. do not delete Referer in Request headers just replace it
+done 4. do not delete Referer in Request headers just replace it
 back to what our sites proxy for.
