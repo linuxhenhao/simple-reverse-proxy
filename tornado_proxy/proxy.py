@@ -336,8 +336,8 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
         ])
 
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_ctx.load_cert_chain(os.path.join(data_dir, "mydomain.crt"),
-        os.path.join(data_dir, "mydomain.key"))
+        ssl_ctx.load_cert_chain(configurations.fullchain_cert_path,\
+                                configrations.private_key_path)
         if(address==None):
             app.listen(port, ssl_options = ssl_ctx)
             app4redirect2https.listen(80)
