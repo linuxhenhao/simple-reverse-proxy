@@ -33,7 +33,6 @@ import ssl
 from urlparse import urlparse
 import filter,re
 import util,config
-from MyConfigParser import RawConfigParser
 
 import tornado.httpserver
 import tornado.ioloop
@@ -88,11 +87,12 @@ class ProxyHandler(tornado.web.RequestHandler):
     #@tornado.web.RequestHandler.initialize
 #add custom config to this class
 #add config=file_path to handler
-    def initialize(self, rules, selfresolve, Myfilter, https_enabled):
-        ProxyHandler._filter=Myfilter
-        ProxyHandler._replace_to_originalhost_rules = rules
-        ProxyHandler._selfresolve = selfresolve
-        ProxyHandler._https_enabled = https_enabled
+    def initialize(self, **kwargs):
+    #rules, selfresolve, Myfilter, https_enabled
+        ProxyHandler._filter=kwargs['Myfilter']
+        ProxyHandler._replace_to_originalhost_rules = kwargs['rules']
+        ProxyHandler._selfresolve = kwargs['selfresolve']
+        ProxyHandler._https_enabled = kwargs['https_enabled']
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -110,7 +110,7 @@ class ProxyHandler(tornado.web.RequestHandler):
             logger.debug('redirect http request %s to https'% self.request.uri)
             self._headers = tornado.httputil.HTTPHeaders()
             self.set_status(301)
-            self.set_header['Location'] = self.request.uri.replace('http','https',1)
+            self.set_header('Location' , self.request.uri.replace('http','https',1))
             self.finish()
 
 
@@ -149,6 +149,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 #replace self.request.headers['Host']
                 target_host,trash = util.get_host_from_url(self._replace_to_originalhost_rules[self.request.host])
                 self.request.headers['Host'] = target_host
+                self.request.host = target_host
 
                 #replace host in referer
                 if('Referer' in self.request.headers): #delete Referer in headers
@@ -278,22 +279,24 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
 
 
     myfilter=filter.Myfilter(configurations,workdir)
+    handler_initialize_dict = dict(rules=configurations.replace_to_originalhost_rules,\
+                         selfresolve=configurations.selfresolve, Myfilter=myfilter,\
+                         https_enabled=configurations.https_enabled
+                         )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
-    (r'.*', ProxyHandler,dict(rules=configurations.replace_to_originalhost_rules,\
-     selfresolve=configurations.selfresolve, Myfilter=myfilter)),
+    (r'.*', ProxyHandler,handler_initialize_dict),
     ])
 
     if(configurations.https_enabled): #https_enabled
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
-        (r'.*', ProxyHandler,dict(rules=configurations.replace_to_originalhost_rules,\
-         selfresolve=configurations.selfresolve, Myfilter=myfilter, https_enabled=configurations.https_enabled)),
+        (r'.*', ProxyHandler,handler_initialize_dict)
         ])
 
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         ssl_ctx.load_cert_chain(configurations.fullchain_cert_path,\
-                                configrations.private_key_path)
+                                configurations.private_key_path)
         if(address==None):
             app.listen(port, ssl_options = ssl_ctx)
             app4redirect2https.listen(80)

@@ -11,13 +11,13 @@ class Myfilter:
         self._configurations = configurations
         self._regexs4select_filter = configurations.regexs4select_filter
         self._replace_to_selfhost_rules = configurations.replace_to_selfhost_rules
-        self._host_proto = configrations.host_proto
+        self._host_proto = configurations.host_proto
 
         self._set_configs_for_all_filters() #set self._filt_name_configs if exists
 
     def _set_configs_for_all_filters(self):
         self._filters_configs = dict()
-        for filter_name in self._regexs4select_filter.values:
+        for filter_name in self._regexs4select_filter.values():
             config = self._configurations.get_configs_for_filter(filter_name)
             if(config != None): #has configs for the filter_name
                 self._filters_configs[filter_name] = config
@@ -54,7 +54,7 @@ class Myfilter:
                 if(href!=None):
                     replaced_url = util.replace_to_selfhost(href,self._replace_to_selfhost_rules)
                     if(replaced_url != None ):
-                    a['href'] = replaced_url
+                        a['href'] = replaced_url
 
 
     def filt_ipv4(self,response,filt_configs=None,**kwards): #url replace for ipv4.google.com

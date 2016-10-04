@@ -5,11 +5,12 @@
 # configuration file
 #
 import re,util
+import os
 
 https_enabled = True
 pwd = os.path.dirname(os.path.realpath(__file__))+'/'
 fullchain_cert_path = pwd+'fullchain1.pem'
-private_key_path = pwd+'private1.pem'
+private_key_path = pwd+'privkey1.pem'
 server_name = '.*thinkeryu.com' #using in add_handler's host pattern for virtual host
 #url replace rules
 scihub_self = 'scihub.thinkeryu.com'
@@ -47,6 +48,7 @@ class configurations:
         self._rules_source = rules_source
         self._regexs4select_filter_source = regexs
         self._selfresolve = selfresolve
+        self._gen_regexs4select_filter()
         self._gen_replace_rules() #generate two dict from rules_source
                                   #add to self.replace_to_xxx
         self._gen_configs_for_filters(**kwargs)
@@ -61,7 +63,7 @@ class configurations:
         return copy
 
     @property
-    def fullchain_cert_path(self):
+    def private_key_path(self):
         copy = self._private_key_path
         return copy
 
