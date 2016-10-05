@@ -361,7 +361,7 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
         ioloop.start()
 
 if __name__ == '__main__':
-    loglevel = logging.DEBUG
+    loglevel = logging.ERROR
     logger.setLevel(loglevel)
     tornado.web.gen_log.setLevel(loglevel)
     tornado.web.access_log.setLevel(loglevel)
