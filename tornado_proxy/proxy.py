@@ -160,10 +160,15 @@ class ProxyHandler(tornado.web.RequestHandler):
                 response_body=self._filter.filt_content(self.url_before_selfresolve,response)
 
                 logger.debug("response's headers")
+                set_cookie_content = response.headers.pop('Set-Cookie',False)
+
                 for header, v in response.headers.get_all():
                     logger.debug('%s:%s'%(header,v))
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
+
+                if(set_cookie_content): #add set-cookie to the end of headers
+                    self.add_header('Set-Cookie',set_cookie_content)
 
                 if response_body:
                     logger.info('>>>before write response body')
