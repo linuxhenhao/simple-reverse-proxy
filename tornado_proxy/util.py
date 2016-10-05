@@ -148,8 +148,9 @@ def cookie_domain_replace(direction,**kwargs):
     cookie_contents = c.output().split("Set-Cookie: ") #["",value,value,value]
     for value in cookie_contents[1:]:
         if(to_selfhost): #for set cookie on client side
-            headers.add('Set-Cookie',value)
+            headers.add('Set-Cookie',value.strip())
+
         else: #for send to real server
-            headers.add("Cookie",value)
+            headers.add("Cookie",value.strip())
 
 origin_selfhost_list = gen_origin_selfhost_list(rules_source)
