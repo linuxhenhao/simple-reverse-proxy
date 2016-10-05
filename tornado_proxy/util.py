@@ -84,7 +84,7 @@ def load_cookie(headers):
     else:
         set_cookie = headers.pop('Cookie',False)
         if(set_cookie):
-        logger.debug('cookie_content>>>\n%s'%set_cookie)
+            logger.debug('cookie_content>>>\n%s'%set_cookie)
             c.load(set_cookie)
             return c
         else:
