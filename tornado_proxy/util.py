@@ -88,13 +88,23 @@ def load_cookie(headers):
             return c
         else:
             return None
-def get_second_level_domain_from_host(host):
-    last_dot_position = host.rfind('.')
-    second_last_dot_position = host.rfind(".",0,last_dot_position)
-    if(second_last_dot_position == -1): #not found second last dot
-        return host
+def get_same_level_domain_from_host(host,domain):
+    dot_counts = domain.count('.')
+    def get_domain(counts,host):
+        last_pos = None
+        while(counts != 0):
+            last_pos = host.rfind('.',0,last_pos)
+            if(last_pos == -1):
+                return host
+            counts = counts - 1
+        return host[last_pos+1:]
+
+    if(domain[0]=='.'): #format .google.com
+        counts = dot_counts
+        return '.'+get_domain(counts,host)
     else:
-        return host[second_last_dot_position+1:]
+        counts =dot_counts+1
+        return get_domain(counts,host)
 
 def cookie_domain_replace(direction,**kwargs):
     '''direction can be 'to_seflhost' and 'to_origin'
@@ -127,11 +137,12 @@ def cookie_domain_replace(direction,**kwargs):
                         if(original_host_without_port == host_without_port):
                             # one of the original_host_without_port must equal to origin_host_without_port
                             # for the program runs into filt_content
-                            selfdomain = get_second_level_domain_from_host(selfhost_without_port)
+                            selfdomain = get_same_level_domain_from_host(selfhost_without_port,domain)
+
                             c[key]['domain'] = selfdomain
                     else: #'to original host'
                         if(selfhost_without_port == host_without_port):
-                            origindomain = get_second_level_domain_from_host(original_host_without_port)
+                            origindomain = get_same_level_domain_from_host(original_host_without_port,domain)
                             c[key]['domain'] = origindomain
     if(to_selfhost): #for set cookie on client side
         headers.parse_line(c.output())
