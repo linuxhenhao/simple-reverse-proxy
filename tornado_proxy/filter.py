@@ -24,10 +24,13 @@ class Myfilter:
                 self._filters_configs[filter_name] = config
 
     def filt_content(self,url,response,**kwargs):
+        logger.debug("In filt_content>>>>>>>>>>>>>>")
         response_body=response.body
         self._location_header_replace(response) #replace host in headers's location if exists
         util.cookie_domain_replace(direction='to_selfhost',url=url,response=response)
-        if(self._get_content_type_from_response(response) != 'text/html'):
+        content_type = self._get_content_type_from_response(response)
+        if( content_type != 'text/html'):
+            logger.debug("content_type is %s, do nothing"% content_type)
             return response_body
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
@@ -79,7 +82,7 @@ class Myfilter:
             return str(soup)
     def filt_scholar(self,response,filt_configs=None,**kwards): #scholar's filter
 
-            logger.debug('In filt_scholar')
+            logger.debug('In filt_scholar>>>>>>>>>>>')
             scihub_host=filt_configs['scihub_host']
             soup=BeautifulSoup(response.body,"html.parser")
 
