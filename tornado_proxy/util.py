@@ -6,7 +6,7 @@ try:
     import Cookie
 except ImportError:
     import http.cookies as Cookie
-import config
+from configini import rules_source
 
 def gen_origin_selfhost_list(tuple_list):
     '''the tuple_list is in [('https://www.xx.xx', 'www.xx.xxx'),] format'''
@@ -18,7 +18,6 @@ def gen_origin_selfhost_list(tuple_list):
         origin_selfhost_list.append((origin_without_port,selfhost_without_port))
     return origin_selfhost_list
 
-origin_selfhost_list = gen_origin_selfhost_list(config.rules_source)
 
 
 class HostNotFoundError(Exception):
@@ -125,8 +124,10 @@ def cookie_domain_replace(direction,**kwargs):
                             # for the program runs into filt_content
                             selfdomain = get_second_level_domain_from_host(selfhost_without_port)
                             c[key]['domain'] = selfdomain
-                    else: 'to original host'
+                    else: #'to original host'
                         if(selfhost_without_port == host_without_port):
                             origindomain = get_second_level_domain_from_host(original_host_without_port)
                             c[key]['domain'] = origindomain
-        headers.parse_line(c.output())
+    headers.parse_line(c.output())
+
+origin_selfhost_list = gen_origin_selfhost_list(rules_source)
