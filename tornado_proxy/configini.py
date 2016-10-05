@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-import os
+import os,logging
 
 https_enabled = True
 
@@ -33,4 +33,4 @@ selfresolve = {'g.scihub.tk':'199.195.251.240'}
 filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}
 
-util_loglevel = DEBUG
+util_loglevel = logging.DEBUG
