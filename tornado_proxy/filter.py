@@ -55,6 +55,8 @@ class Myfilter:
                 replaced_url =  util.replace_to_selfhost(origin_location_url,self._replace_to_selfhost_rules)
                 if (replaced_url != None): #replaced successfully,has corresponding host in rules
                     new_location='Location:'+ replaced_url
+                else:
+                    new_location ='Location:' + original_location_url
                 response.headers.parse_line(new_location)
 
     def _replace_host(self,soup):
