@@ -9,6 +9,7 @@ except ImportError:
 from configini import rules_source,util_loglevel
 import logging
 logger = logging.getLogger('util_log')
+logger.setLevel(util_loglevel)
 
 def gen_origin_selfhost_list(tuple_list):
     '''the tuple_list is in [('https://www.xx.xx', 'www.xx.xxx'),] format'''
