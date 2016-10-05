@@ -34,6 +34,6 @@ filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}
 
 util_log_level = logging.DEBUG
-logger_level = logging.DEBUG
+logger_level = logging.ERROR #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR

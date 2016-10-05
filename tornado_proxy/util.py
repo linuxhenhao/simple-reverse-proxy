@@ -144,6 +144,7 @@ def cookie_domain_replace(direction,**kwargs):
                         if(selfhost_without_port == host_without_port):
                             origindomain = get_same_level_domain_from_host(original_host_without_port,domain)
                             c[key]['domain'] = origindomain
+    logger.debug("cookie output from simpleCookie>>>\n%s"%c.output())
     if(to_selfhost): #for set cookie on client side
         headers.parse_line(c.output())
     else: #for send to real server
