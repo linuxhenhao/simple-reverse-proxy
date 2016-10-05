@@ -2,10 +2,8 @@
 #-*- coding: utf-8 -*-
 
 #general useful functions for this project
-try:
-    import Cookie
-except ImportError:
-    import http.cookies as Cookie
+import MyCookie
+
 from configini import rules_source,util_loglevel
 import logging
 logger = logging.getLogger('util_log')
