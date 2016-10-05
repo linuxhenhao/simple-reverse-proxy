@@ -56,7 +56,7 @@ class Myfilter:
                 if (replaced_url != None): #replaced successfully,has corresponding host in rules
                     new_location='Location:'+ replaced_url
                 else:
-                    new_location ='Location:' + original_location_url
+                    new_location ='Location:' + origin_location_url
                 response.headers.parse_line(new_location)
 
     def _replace_host(self,soup):
