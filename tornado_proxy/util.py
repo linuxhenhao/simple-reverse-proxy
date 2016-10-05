@@ -130,6 +130,9 @@ def cookie_domain_replace(direction,**kwargs):
                         if(selfhost_without_port == host_without_port):
                             origindomain = get_second_level_domain_from_host(original_host_without_port)
                             c[key]['domain'] = origindomain
-    headers.parse_line(c.output())
+    if(to_selfhost): #for set cookie on client side
+        headers.parse_line(c.output())
+    else: #for send to real server
+        headers.parse_line("Cookie:"+c.output().split("Set-Cookie:")[1])
 
 origin_selfhost_list = gen_origin_selfhost_list(rules_source)
