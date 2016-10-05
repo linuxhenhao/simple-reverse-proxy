@@ -4,10 +4,10 @@
 #general useful functions for this project
 import MyCookie as Cookie
 
-from configini import rules_source,util_loglevel
+from configini import rules_source,util_log_level
 import logging
 logger = logging.getLogger('util_log')
-logger.setLevel(util_loglevel)
+logger.setLevel(util_log_level)
 
 def gen_origin_selfhost_list(tuple_list):
     '''the tuple_list is in [('https://www.xx.xx', 'www.xx.xxx'),] format'''

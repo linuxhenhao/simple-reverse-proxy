@@ -33,4 +33,7 @@ selfresolve = {'g.scihub.tk':'199.195.251.240'}
 filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}
 
-util_loglevel = logging.DEBUG
+util_log_level = logging.DEBUG
+logger_level = logging.DEBUG
+gen_log_level = logging.ERROR
+access_log_level = logging.ERROR
