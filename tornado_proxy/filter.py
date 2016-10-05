@@ -26,6 +26,7 @@ class Myfilter:
     def filt_content(self,url,response,**kwargs):
         response_body=response.body
         self._location_header_replace(response) #replace host in headers's location if exists
+        util.cookie_domain_replace(direction='to_selfhost',url=url,response=response)
         if(self._get_content_type_from_response(response) != 'text/html'):
             return response_body
         for url_pattern in self._regexs4select_filter.keys():
@@ -40,11 +41,10 @@ class Myfilter:
                     response_body=return_body
         return response_body
     def _get_content_type_from_response(self,response):
-        content_type = response.headers.pop('Content-Type',False)
-        if(content_type != False): #get content_type
-            response.headers.parse_line('Content-Type:'+content_type) #add back to response
+        try:
+            content_type = response.headers['Content-Type']
             return content_type
-        else:
+        except KeyError:
             return None
 
     def _location_header_replace(self,response):

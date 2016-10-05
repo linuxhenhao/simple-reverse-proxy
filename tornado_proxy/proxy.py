@@ -34,6 +34,12 @@ from urlparse import urlparse
 import filter,re
 import util,config
 
+try:
+    import Cookie  # py2
+except ImportError:
+    import http.cookies as Cookie  # py3
+
+
 import tornado.httpserver
 import tornado.ioloop
 import tornado.iostream
@@ -181,6 +187,9 @@ class ProxyHandler(tornado.web.RequestHandler):
                 target_host,trash = util.get_host_from_url(self._replace_to_originalhost_rules[self.request.host])
                 self.request.headers['Host'] = target_host
                 self.request.host = target_host
+
+                #replace cookies's domain option if has
+                util.cookie_domain_replace(direction='to_origin',httpHandler=self)
 
                 #replace host in referer
                 if('Referer' in self.request.headers): #delete Referer in headers
