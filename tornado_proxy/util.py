@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 #general useful functions for this project
-import MyCookie
+import MyCookie as Cookie
 
 from configini import rules_source,util_loglevel
 import logging
