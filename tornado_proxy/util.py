@@ -6,7 +6,9 @@ try:
     import Cookie
 except ImportError:
     import http.cookies as Cookie
-from configini import rules_source
+from configini import rules_source,util_loglevel
+import logging
+logger = logging.getLogger('util_log')
 
 def gen_origin_selfhost_list(tuple_list):
     '''the tuple_list is in [('https://www.xx.xx', 'www.xx.xxx'),] format'''
@@ -76,11 +78,13 @@ def load_cookie(headers):
     c = Cookie.SimpleCookie()
     set_cookie = headers.pop('Set-Cookie',False)
     if(set_cookie): # has set-cookie section
+        logger.debug('cookie_content>>>\n%s'%set_cookie)
         c.load(set_cookie)
         return c
     else:
         set_cookie = headers.pop('Cookie',False)
         if(set_cookie):
+        logger.debug('cookie_content>>>\n%s'%set_cookie)
             c.load(set_cookie)
             return c
         else:
