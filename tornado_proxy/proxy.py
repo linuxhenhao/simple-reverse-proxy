@@ -167,10 +167,10 @@ class ProxyHandler(tornado.web.RequestHandler):
 
                 logger.debug("response's headers")
 
-                for header_key in response.headers.keys():
-                    logger.debug('%s:%s'%(header_key,response.headers[header_key]))
-                    if header_key not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
-                        self.add_header(header_key, response.headers[header_key]) # some header appear multiple times, eg 'Set-Cookie'
+                for header,v in response.headers.get_all():
+                    logger.debug('%s:%s'%(header,v))
+                    if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
+                        self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
 
 
                 if response_body:
