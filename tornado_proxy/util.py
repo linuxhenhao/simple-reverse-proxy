@@ -100,6 +100,8 @@ def cookie_domain_replace(direction,**kwargs):
     '''
     if(direction == 'to_selfhost'):
         to_selfhost = True
+    else:
+        to_selfhost = False
     if(to_selfhost):
         url = kwargs['url']
         headers =kwargs['response'].headers
