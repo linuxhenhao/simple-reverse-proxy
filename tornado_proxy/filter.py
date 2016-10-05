@@ -79,7 +79,7 @@ class Myfilter:
             return str(soup)
     def filt_scholar(self,response,filt_configs=None,**kwards): #scholar's filter
 
-
+            logger.debug('In filt_scholar')
             scihub_host=filt_configs['scihub_host']
             soup=BeautifulSoup(response.body,"html.parser")
 
