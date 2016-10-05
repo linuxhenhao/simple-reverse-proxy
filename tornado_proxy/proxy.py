@@ -71,10 +71,7 @@ def fetch_request(url, callback, **kwargs):
         'tornado.curl_httpclient.CurlAsyncHTTPClient')
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
-    try:
-        client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
-    except e:
-        print e
+    client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
 
 
 
@@ -161,7 +158,10 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
                 logger.info('>>>before filt_content')
                 response_body=self._filter.filt_content(self.url_before_selfresolve,response)
+
+                logger.debug("response's headers")
                 for header, v in response.headers.get_all():
+                    logger.debug('%s:%s'%(header,v))
                     if header not in ('Content-Length', 'Transfer-Encoding', 'Content-Encoding', 'Connection'):
                         self.add_header(header, v) # some header appear multiple times, eg 'Set-Cookie'
 
@@ -350,7 +350,7 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
         ioloop.start()
 
 if __name__ == '__main__':
-    loglevel = logging.ERROR
+    loglevel = logging.DEBUG
     logger.setLevel(loglevel)
     tornado.web.gen_log.setLevel(loglevel)
     tornado.web.access_log.setLevel(loglevel)
