@@ -18,7 +18,8 @@ class getHostError(Exception):
         return repr(sefl.error_message)
 
 class configurations:
-    def __init__(self,https_enabled, fullchain_cert_path, private_key_path, server_name,rules_source,regexs,selfresolve,**kwargs):
+    def __init__(self,https_enabled, fullchain_cert_path, private_key_path,\
+            server_name,server_static_root,rules_source,regexs,selfresolve,**kwargs):
         self._https_enabled = https_enabled
         if(https_enabled):
             self._selfhost_proto = 'https'
@@ -27,6 +28,7 @@ class configurations:
         self._fullchain_cert_path = fullchain_cert_path
         self._private_key_path = private_key_path
         self._server_name = server_name
+        self._server_static_root = server_static_root
         self._rules_source = rules_source
         self._regexs4select_filter_source = regexs
         self._selfresolve = selfresolve
@@ -61,8 +63,12 @@ class configurations:
     @property
     def server_name(self):
         copy = self._server_name
-        return server_name
+        return copy
 
+    @property
+    def server_static_root(self):
+        copy = self._server_static_root
+        return copy
     @property
     def regexs4select_filter(self):
         return self._regexs4select_filter.copy()
@@ -105,5 +111,5 @@ class configurations:
             if(kwargs.has_key(filter_name+'_configs')):
                 setattr(self, "_"+filter_name, kwargs[filter_name+'_configs'])
 
-all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path,server_name,rules_source,regexs4select_filter_source,selfresolve, \
+all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path,server_name,server_static_root,rules_source,regexs4select_filter_source,selfresolve, \
                 filt_scholar_configs=filt_scholar_configs,filt_scihub_configs=filt_scihub_configs)

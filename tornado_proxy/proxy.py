@@ -79,6 +79,54 @@ def fetch_request(url, callback, **kwargs):
     client = tornado.httpclient.AsyncHTTPClient()
     client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
 
+class FileHandler(tornado.web.RequestHandler):
+    SUPPORTED_METHODS = ['GET']
+
+    def compute_etag(self):
+        return None #disable tornado Etag
+    def initialize(self,server_static_root):
+        self.server_static_root = server_static_root
+
+    @tornado.web.asynchronous
+    def get(self):
+        logger.debug("file handler handler request uri %s"%self.request.uri)
+        self.headers = tornado.httputil.HTTPHeaders()
+        file_size = self.get_file_descriptor_by_uri()
+        if( file_size != 0): # True if get file descriptor success
+            self.set_status(200)
+            self.set_header('Content-Length', file_size)
+            while True:
+                response_body = self.file_descriptor.read(1048576)
+                # 1024*1024 1M byte every time
+                if(response_body != ''):
+                    self.write(response_body)
+                else: # no left content to send
+                    self.file_descriptor.close()
+                    break
+        else:
+            self.set_status(404)
+            self.write('File Not Found!')
+
+        self.finish()
+
+    def get_file_descriptor_by_uri(self):
+        # add self.file_descriptor and return file size,zero if file not found
+        #url is in '/xxx.xxx/xxx/' or https?://xxx.xxx/xxx format
+        #check url format to cut host and https? part first
+        host_pattern=re.compile("(https?://[^/]+)")
+        match_result=host_pattern.match(self.request.uri)
+        if(match_result!=None): #has host info in uri, 'https?://xxx/xxx' format
+            file_location = self.server_static_root  + self.request.uri[match_result.end:]
+        else:
+            file_location = self.server_static_root + self.request.uri
+        if(os.path.exists(file_location)): #file exists
+            self.file_descriptor = open(file_location)
+            return os.path.getsize(file_location)
+        else:
+            return 0
+
+
+
 
 
 class HttpHandler(tornado.web.RequestHandler):
@@ -332,12 +380,16 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
+    (r'/robots.txt',FileHandler,dict(server_static_root=configurations.server_static_root)
+    ),
     (r'.*', ProxyHandler,handler_initialize_dict),
     ])
 
     if(configurations.https_enabled): #https_enabled
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
+        (r'/robots.txt',FileHandler,dict(server_static_root=configurations.server_static_root)
+        ),
         (r'.*', HttpHandler,dict(rules=configurations.replace_to_originalhost_rules)
         )
         ])

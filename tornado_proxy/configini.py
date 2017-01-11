@@ -16,6 +16,7 @@ else:
 
 server_name = '.*thinkeryu.com' #using in add_handler's host pattern for virtual host
 
+server_static_root = './static/'
 #url replace rules
 scihub_self = 'scihub.thinkeryu.com'
 
