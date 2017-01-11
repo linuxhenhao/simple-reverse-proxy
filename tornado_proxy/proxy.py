@@ -29,7 +29,8 @@ import logging
 import os
 import sys
 import socket
-import ssl
+import ssl,random
+
 from urlparse import urlparse
 import filter,re
 import util,config
@@ -252,7 +253,9 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.url_before_selfresolve = self.request.uri
                 host_without_port = host.split(":")[0]
                 if(self._selfresolve.has_key(host_without_port)): # request host in selfresolve dict
-                    ip_addr = self._selfresolve[host_without_port]
+                    ip_addrs = self._selfresolve[host_without_port]
+                    #if ip_addrs has multiple values, random get one ip to fetch content
+                    ip_addr = ip_addrs[random.randint(0,len(ip_addrs)-1)]
                     self.request.uri = self.request.uri.replace(host_without_port, ip_addr)
                 logger.debug("request after redirect>>>\n %s" % self.request)
 
