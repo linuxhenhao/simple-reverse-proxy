@@ -105,14 +105,15 @@ class FindMeGoogleIP:
     def get_ip_prefix(ip):
         return re.sub('\.[0-9]+$', '', ip)
 
-    def show_results(self):
+    def get_results(self):
         if self.reachable:
             reachable_sorted = sorted(self.reachable, key=lambda x: x[1])
             self.concatenated_result = '|'.join(ip for ip, rtt in reachable_sorted)
             self.json_result = [ip for ip, rtt in reachable_sorted]
-            print(json.dumps(self.json_result))
+            return self.json_result
         else:
             logging.info("No available servers found")
+            return None
 
     def write_into_gae_user_json(self):
         if os.path.isfile(settings.gae_user_json_file) is None:
@@ -134,7 +135,7 @@ class FindMeGoogleIP:
         self.lookup_ips()
         self.check_service()
         # self.cleanup_low_quality_ips()
-        self.show_results()
+        return self.get_results()
         #self.write_into_gae_user_json()
 
     def update_dns_files(self):
@@ -229,12 +230,29 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         if sys.argv[1] == 'update':
             FindMeGoogleIP([]).update_dns_files()
+#        else:
+#            FindMeGoogleIP(sys.argv[1:]).run()
+#    else:
+#        domain = [random.choice(FindMeGoogleIP.read_domains())]
+#        logging.info("Usage:")
+#        logging.info("Find ips in specified domains: findmegoogleip.py kr us")
+#        logging.info("=" * 50)
+#        logging.info("Now running default: find ip from a randomly chosen domain: %s" % domain[0])
+    domains = ['jp','tw','hk','us','kr','fr']
+    last_time = time.time()
+    while(True): #endless loop
+        if( (time.time()-last_time)/(3600*24) ==  31): #every 31 days,update dns files
+            last_time = time.time() # update last dns files's update time
+            FindMeGoogleIP([]).update_dns_files()
+
+
+
+        ip_list = FindMeGoogleIP(domains).run()
+        if(ip_list == None):
+            print('No available ip found')
         else:
-            FindMeGoogleIP(sys.argv[1:]).run()
-    else:
-        domain = [random.choice(FindMeGoogleIP.read_domains())]
-        logging.info("Usage:")
-        logging.info("Find ips in specified domains: findmegoogleip.py kr us")
-        logging.info("=" * 50)
-        logging.info("Now running default: find ip from a randomly chosen domain: %s" % domain[0])
-        FindMeGoogleIP(domain).run()
+            print(ip_list)
+            data = {'google_ip_list':ip_list}
+            response = urllib2.urlopen('https://scholar.google.com/update',data)
+            print(response.read())
+        time.sleep(3600*24) #every 24hrs, update usable ip addresses
