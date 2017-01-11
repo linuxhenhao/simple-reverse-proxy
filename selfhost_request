@@ -1,0 +1,32 @@
+Frame 1089: 819 bytes on wire (6552 bits), 819 bytes captured (6552 bits) on interface 0
+Ethernet II, Src: 56:00:00:34:7a:3b (56:00:00:34:7a:3b), Dst: fe:00:00:34:7a:3b (fe:00:00:34:7a:3b)
+Internet Protocol Version 4, Src: 45.32.53.241, Dst: 216.58.197.14
+Transmission Control Protocol, Src Port: 60588, Dst Port: 80, Seq: 1, Ack: 1, Len: 753
+Hypertext Transfer Protocol
+    GET /sorry/CaptchaRedirect?captcha=entshm&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit HTTP/1.1\r\n
+        [Expert Info (Chat/Sequence): GET /sorry/CaptchaRedirect?captcha=entshm&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit HTTP/1.1\r\n]
+            [GET /sorry/CaptchaRedirect?captcha=entshm&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit HTTP/1.1\r\n]
+            [Severity level: Chat]
+            [Group: Sequence]
+        Request Method: GET
+        Request URI: /sorry/CaptchaRedirect?captcha=entshm&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit
+            Request URI Path: /sorry/CaptchaRedirect
+            Request URI Query: captcha=entshm&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit
+                Request URI Query Parameter: captcha=entshm
+                Request URI Query Parameter: q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY
+                Request URI Query Parameter: continue=https%3A%2F%2Fscholar.google.com%2F
+                Request URI Query Parameter: submit=Submit
+        Request Version: HTTP/1.1
+    Host: ipv4.google.com\r\n
+    Accept-Language: en-US,en;q=0.5\r\n
+    Accept-Encoding: gzip, deflate\r\n
+    Set-Cookie: GOOGLE_ABUSE_EXEMPTION=ID=c4303e6a332b0243:TM=1475212491:C=c:IP=45.32.53.241-:S=APGng0vO-7ChM_fdBgoUELA7RIJNYgpOrQ\r\n
+    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0\r\n
+    Connection: keep-alive\r\n
+    Referer: http://ipv4.google.com/sorry/CaptchaRedirect?captcha=iunins&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit\r\n
+    \r\n
+    [Full request URI: http://ipv4.google.com/sorry/CaptchaRedirect?captcha=entshm&q=CGMSBC0gNfEYy-m3vwUiGQDxp4NLy_ftLOXBSvgUvhA7i7vFnkP9JTY&continue=https%3A%2F%2Fscholar.google.com%2F&submit=Submit]
+    [HTTP request 1/2]
+    [Response in frame: 1091]
+    [Next request in frame: 1093]
