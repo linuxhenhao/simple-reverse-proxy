@@ -110,16 +110,7 @@ class FindMeGoogleIP:
             reachable_sorted = sorted(self.reachable, key=lambda x: x[1])
             self.concatenated_result = '|'.join(ip for ip, rtt in reachable_sorted)
             self.json_result = [ip for ip, rtt in reachable_sorted]
-
-            logging.info("%d IPs ordered by approximate delay time(milliseconds):" % len(reachable_sorted))
-            for item in reachable_sorted:
-                logging.info((item[0], item[1], self.resolved_ips[item[0]][1]))
-
-            logging.info("%d IPs concatenated:" % len(self.reachable))
-            logging.info(self.concatenated_result)
-
-            logging.info("%d IPs in JSON format:" % len(self.reachable))
-            logging.info(json.dumps(self.json_result))
+            print(json.dumps(self.json_result))
         else:
             logging.info("No available servers found")
 
@@ -144,7 +135,7 @@ class FindMeGoogleIP:
         self.check_service()
         # self.cleanup_low_quality_ips()
         self.show_results()
-        self.write_into_gae_user_json()
+        #self.write_into_gae_user_json()
 
     def update_dns_files(self):
         threads = [DNSServerFileDownload(location) for location in FindMeGoogleIP.read_domains()]
@@ -234,7 +225,7 @@ class NsLookup(threading.Thread):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
     if len(sys.argv) >= 2:
         if sys.argv[1] == 'update':
             FindMeGoogleIP([]).update_dns_files()
