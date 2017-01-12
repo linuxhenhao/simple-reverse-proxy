@@ -93,7 +93,7 @@ class UpdateHandler(tornado.web.RequestHandler):
         logger.info('in update handler,handle request %s'%self.request)
         self.headers = tornado.httputil.HTTPHeaders()
 
-        if(self.request.remote_ip != '127.0.0.1' or self.request.remote_ip\
+        if(self.request.remote_ip != '127.0.0.1' and self.request.remote_ip\
                 != "::1"): #for both ipv4 and ipv6, only recive update post
                            #from localhost in consideration for security
             self.set_status(403)

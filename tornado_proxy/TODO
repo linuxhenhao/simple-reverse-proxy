@@ -36,10 +36,14 @@ back to what our sites proxy for.
 
 --------
 2017.01.11
-1. add more google's ip address for random choose to avoid bot check of google
+done 1. add more google's ip address for random choose to avoid bot check of google
 :use findmegoogleip to fetch new available google's server ip,and use urllib2
 to post new ip to proxy.py,proxy.py use a handler to update selfresolve dict
 in proxyHandler's global property list. make sure only update post from local ip
 will be accepted
 done 2. deny search engine to avoid unwanted visit of google, also to decrease
    google's bot check
+
+2017.01.12
+done 1. findmegoogleip can't send post to scholar.thinkeryu.com normally,solve this
+ use 'and' not 'or' for check 127.0.0.1 or ::1
