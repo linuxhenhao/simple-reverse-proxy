@@ -14,6 +14,7 @@ import urllib2
 import settings
 import logging
 import json
+import multiprocessing
 
 
 class FindMeGoogleIP:
@@ -223,10 +224,109 @@ class NsLookup(threading.Thread):
             return True
         else:
             return False
+# DNSQuery class from http://code.activestate.com/recipes/491264-mini-fake-dns-server/
+class DNSQuery:
+    def __init__(self, data):
+        self.data=data
+        self.domain=''
 
+        tipo = (ord(data[2]) >> 3) & 15   # Opcode bits
+        if tipo == 0:                     # Standard query
+            ini=12
+            lon=ord(data[ini])
+            while lon != 0:
+                self.domain+=data[ini+1:ini+lon+1]+'.'
+                ini+=lon+1
+                lon=ord(data[ini])
+
+    def respuesta(self, ip):
+        packet=''
+        if self.domain:
+            packet+=self.data[:2] + "\x81\x80"
+            packet+=self.data[4:6] + self.data[4:6] + '\x00\x00\x00\x00'   # Questions and Answers Counts
+            packet+=self.data[12:]                                         # Original Domain Name Question
+            packet+='\xc0\x0c'                                             # Pointer to domain name
+            packet+='\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'             # Response type, ttl and resource data length -> 4 bytes
+            packet+=str.join('',map(lambda x: chr(int(x)), ip.split('.'))) # 4bytes of IP
+        return packet
+
+class DNSServer:
+    '''
+    use host_ip_map dict to do local resolve,
+    and query results from upper server when domain not in this map.
+    map dict format {'domain',[ip,ip,ip]}
+    randomly return one of the ips in ip list
+    '''
+    def __init__(self,host_ip_map,upper_server):
+        self._host_ip_map = host_ip_map
+        self._upper_name_server = upper_server
+        self._resolver = dns.resolver.Resolver()
+        self._resolver.nameservers = [self._upper_name_server]
+        self._resolver.lifetime = 5
+    def run(self):
+        logging.debug(">>>>>>starting udp dns name server")
+        try:
+            udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            udp_server.bind(('127.0.0.1',53)) #only answer local queries
+        except Exception, e:
+            print("Failed to create socket on UDP port 53:",e)
+            sys.exit(1)
+        def get_ip_address_by_domain(domain,host_ip_map,resolver):
+            ip_address = '127.0.0.1'
+            domain = domain.rstrip('.')
+            if(host_ip_map.has_key(domain)):
+                ip_address = host_ip_map[domain][random.randint(0,\
+                        len(host_ip_map[domain])-1)] #random choose one of the ips in list
+                logging.debug(">>>>>>find %s in %s"%(domain,ip_address))
+            else:
+                logging.debug(">>>>>>resolve %s from upper name server"%domain)
+                answer = resolver.query(domain) #may occur timeout or other dns erro
+                                                #auto break is enough, no more action
+                for response in answer:
+                    ip_address = str(response)
+                    #only return the last ip in query answer
+            logging.debug(">>>>>>domain %s's ip is %s"%ip_address)
+            return  ip_address
+
+
+	def query_and_send_back_ip(data, addr,udp_server,host_ip_map,resolver):
+	    try:
+		p=DNSQuery(data)
+		logging.info('Request domain: %s' % p.domain)
+		ip = get_ip_address_by_domain(p.domain,host_ip_map,resolver)
+		udp_server.sendto(p.respuesta(ip), addr)
+		logging.info('Request: %s -> %s' % (p.domain, get_ip_address_by_domain(p.domain)))
+            except Exception, e:
+		print 'query for:%s error:%s' % (p.domain, e)
+        while True:
+            data, addr = udp_server.recvfrom(1024)
+            logging.debug(">>>>>>recived new dns query, starting new thread")
+            threading.Thread(target=query_and_send_back_ip,args=(data,addr,udp_server,self._host_ip_map,self._resolver))
+
+def update_host_ip_map_daemon(shared_host_ip_dict):
+    while True:
+        time.sleep(24*3600)  #wait 24hrs before next update
+        update_google_ips(shared_host_ip_dict)
+
+def update_google_ips(shared_host_ip_dict):
+    domains = ['jp']
+    #domains = ['jp','tw','hk','us','kr','fr']
+    ip_list = FindMeGoogleIP(domains).run()
+    if(ip_list == None):
+        print('No available ip found')
+    else:
+        print(ip_list)
+        IPs = int(len(ip_list)/3)
+        num_of_IPs = 100 if IPs > 100 else IPs
+        #update shared_host_ip_dict
+        shared_host_ip_dict['scholar.google.com'] = ip_list[:num_of_IPs]
+
+def run_dns_server(host_ip_map,upper_dns_server):
+    dns_server = DNSServer(host_ip_map,upper_dns_server)
+    dns_server.run()
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
+    logging.basicConfig(format='%(message)s', level=logging.DEBUG)
     if len(sys.argv) >= 2:
         if sys.argv[1] == 'update':
             FindMeGoogleIP([]).update_dns_files()
@@ -238,31 +338,17 @@ if __name__ == "__main__":
 #        logging.info("Find ips in specified domains: findmegoogleip.py kr us")
 #        logging.info("=" * 50)
 #        logging.info("Now running default: find ip from a randomly chosen domain: %s" % domain[0])
-    domains = ['jp','tw','hk','us','kr','fr']
-    last_time = time.time()
-    while(True): #endless loop
-#update_dns mannully, may one time a year is enough
+    upper_server = "208.67.222.123"
+    manager = multiprocessing.Manager()
+    host_ip_map = manager.dict()
+    logging.debug(">>>>>>updating google ip map the first time")
+    update_google_ips(host_ip_map) #generate host_ip_map first of all
+    logging.debug(">>>>>>starting host_ip_map update daemon process")
+    host_ip_map_update_process = multiprocessing.Process(target=\
+            update_host_ip_map_daemon,args=(host_ip_map,))
 
-        ip_list = FindMeGoogleIP(domains).run()
-        #ip_list = ['111.222','333.444','13212','1212','3232','3112','3232']
-        if(ip_list == None):
-            print('No available ip found')
-        else:
-            print(ip_list)
-            IPs = int(len(ip_list)/3)
-            num_of_IPs = 100 if IPs > 100 else IPs
-            data = {'scholar.google.com':ip_list[:num_of_IPs]}
-
-            headers = {
-                    "User-Agent":"FindMeGoogleIP",
-                    "Host":"scholar.thinkeryu.com",
-                    "Content-Type":"application/json"
-                    }
-            try:
-                request = urllib2.Request("https://127.0.0.1/update",json.dumps(data),headers = headers)
-                response = urllib2.urlopen(request)
-            except: #https no enabled
-                request = urllib2.Request("http://127.0.0.1/update",json.dumps(data),headers = headers)
-                response = urllib2.urlopen(request)
-            print(response.read())
-        time.sleep(3600*24) #every 24hrs, update usable ip addresses
+    logging.debug(">>>>>>starting dns server daemon process")
+    dns_server_process = multiprocessing.Process(target=run_dns_server,\
+            args=(host_ip_map,upper_server))
+    host_ip_map_update_process.start()
+    dns_server_process.start()
