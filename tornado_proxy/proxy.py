@@ -291,6 +291,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                     ip_addrs = self._selfresolve[host_without_port]
                     #if ip_addrs has multiple values, random get one ip to fetch content
                     ip_addr = ip_addrs[random.randint(0,len(ip_addrs)-1)]
+                    logger.debug("ip list length is %d"%len(ip_addrs))
                     self.request.uri = self.request.uri.replace(host_without_port, ip_addr)
                 logger.debug("request after redirect>>>\n %s" % self.request)
 
