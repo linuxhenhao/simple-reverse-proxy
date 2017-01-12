@@ -241,18 +241,28 @@ if __name__ == "__main__":
     domains = ['jp','tw','hk','us','kr','fr']
     last_time = time.time()
     while(True): #endless loop
-        if( (time.time()-last_time)/(3600*24) ==  31): #every 31 days,update dns files
-            last_time = time.time() # update last dns files's update time
-            FindMeGoogleIP([]).update_dns_files()
-
-
+#update_dns mannully, may one time a year is enough
 
         ip_list = FindMeGoogleIP(domains).run()
+        #ip_list = ['111.222','333.444','13212','1212','3232','3112','3232']
         if(ip_list == None):
             print('No available ip found')
         else:
             print(ip_list)
-            data = {'google_ip_list':ip_list}
-            response = urllib2.urlopen('https://scholar.google.com/update',data)
+            IPs = int(len(ip_list)/3)
+            num_of_IPs = 100 if IPs > 100 else IPs
+            data = {'scholar.google.com':ip_list[:num_of_IPs]}
+
+            headers = {
+                    "User-Agent":"FindMeGoogleIP",
+                    "Host":"scholar.thinkeryu.com",
+                    "Content-Type":"application/json"
+                    }
+            try:
+                request = urllib2.Request("https://127.0.0.1/update",json.dumps(data),headers = headers)
+                response = urllib2.urlopen(request)
+            except: #https no enabled
+                request = urllib2.Request("http://127.0.0.1/update",json.dumps(data),headers = headers)
+                response = urllib2.urlopen(request)
             print(response.read())
         time.sleep(3600*24) #every 24hrs, update usable ip addresses
