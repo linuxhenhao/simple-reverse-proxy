@@ -34,6 +34,7 @@ import ssl,random
 from urlparse import urlparse
 import filter,re
 import util,config
+import json
 
 try:
     import Cookie  # py2
@@ -79,6 +80,32 @@ def fetch_request(url, callback, **kwargs):
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
     client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
+
+class UpdateHandler(tornado.web.RequestHandler):
+    SUPPORTED_METHODS = [ 'POST' ]
+
+    def compute_etag(self):
+        return None #disable tornado Etag
+
+    def initialize(self,selfresolve_dict):
+        self.host_dict = selfresolve_dict
+    def post(self):
+        logger.info('in update handler,handle request %s'%self.request)
+        self.headers = tornado.httputil.HTTPHeaders()
+        self.set_status(200)
+        response = ''
+        if(self.request.headers['Content-Type'].lower() == 'application/json'):
+            recived_dict = json.loads(self.request.body)
+            logger.info('recived_dict is %s'%recived_dict)
+            for key in recived_dict.keys():
+                self.host_dict[key] = recived_dict[key]
+                response += 'set key '+key+' to '+json.dumps(recived_dict[key])
+        else:
+            response = 'update failed, only accept json type update,in key,ip_list pair'
+
+        self.set_header('Content-Length',len(response))
+        self.write(response)
+        self.finish()
 
 class FileHandler(tornado.web.RequestHandler):
     SUPPORTED_METHODS = ['GET']
@@ -384,6 +411,8 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
     (r'/robots.txt',FileHandler,dict(server_static_root=configurations.server_static_root)
+    ),
+    (r'/update',UpdateHandler,dict(selfresolve_dict=configurations.selfresolve)
     ),
     (r'.*', ProxyHandler,handler_initialize_dict),
     ])

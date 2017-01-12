@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 import os,logging
 
-https_enabled = True
+https_enabled = False
 
 pwd = os.path.dirname(os.path.realpath(__file__))+'/'
 
@@ -69,6 +69,6 @@ filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}
 
 util_log_level = logging.ERROR
-logger_level = logging.ERROR #proxy.py's log
+logger_level = logging.INFO #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
