@@ -290,21 +290,21 @@ class DNSServer:
             return  ip_address
 
 
-		def query_and_send_back_ip(data, addr, udp_server, host_ip_map, resolver):
-		    try:
-				p=DNSQuery(data)
-				logging.info('Request domain: %s' % p.domain)
-				ip = get_ip_address_by_domain(p.domain,host_ip_map,resolver)
-				udp_server.sendto(p.respuesta(ip), addr)
-				logging.info('Request: %s -> %s' % (p.domain, get_ip_address_by_domain(p.domain)))
-	        except Exception, e:
-				print 'query for:%s error:%s' % (p.domain, e)
-	    while True:
-	        data, addr = udp_server.recvfrom(1024)
-	        logging.debug(">>>>>>recived new dns query, starting new thread")
-	        thread = threading.Thread(target=query_and_send_back_ip,args=(data,addr,udp_server,self._host_ip_map,self._resolver))
-	        thread.start()
-	    udp_server.close()    
+        def query_and_send_back_ip(data, addr, udp_server, host_ip_map, resolver):
+            try:
+                p=DNSQuery(data)
+                logging.info('Request domain: %s' % p.domain)
+                ip = get_ip_address_by_domain(p.domain,host_ip_map,resolver)
+                udp_server.sendto(p.respuesta(ip), addr)
+                logging.info('Request: %s -> %s' % (p.domain, get_ip_address_by_domain(p.domain)))
+            except Exception, e:
+                print 'query for:%s error:%s' % (p.domain, e)
+        while True:
+            data, addr = udp_server.recvfrom(1024)
+            logging.debug(">>>>>>recived new dns query, starting new thread")
+            thread = threading.Thread(target=query_and_send_back_ip,args=(data,addr,udp_server,self._host_ip_map,self._resolver))
+            thread.start()
+        udp_server.close()
 
 
 def update_host_ip_map_daemon(shared_host_ip_dict):
@@ -347,7 +347,7 @@ if __name__ == "__main__":
 
     manager = multiprocessing.Manager() #using manager to generate dict to share between processes
     host_ip_map = manager.dict()
-    
+
     logging.debug(">>>>>>updating google ip map the first time")
     update_google_ips(host_ip_map) 		#generate host_ip_map first of all
     logging.debug(">>>>>>starting host_ip_map update daemon process")
