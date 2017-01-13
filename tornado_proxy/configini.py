@@ -33,37 +33,11 @@ regexs4select_filter_source = {'https?://scholar\.google\..*':'filt_scholar',
 # {'host_name':ip_addrs_list}
 # if there is more than one item in ip_addrs_list
 # get one of the in random
-selfresolve = {'scholar.google.com':
-        [
-            "218.189.25.129",
-            "218.189.25.178",
-            "93.123.23.1",
-            "93.123.23.27",
-            "197.199.253.45",
-            "197.199.253.52",
-            "218.253.0.156",
-            "218.253.0.169",
-            "111.92.162.23",
-            "111.92.162.54",
-            "218.176.242.4",
-            "218.176.242.44",
-            "218.176.242.39",
-            "218.176.242.75",
-            "218.176.242.247",
-            "103.25.178.17",
-            "103.25.178.29",
-            "203.116.165.186",
-            "203.116.165.204",
-            "123.205.250.100",
-            "123.205.250.136",
-            "163.28.83.149",
-            "163.28.83.187",
-            "1.179.248.142",
-            "1.179.248.161",
-            "118.174.25.7",
-            "118.174.25.75",
-        ]
-        }
+selfresolve = {}  # replace scholar.google.com to google server's ip address in request uri directly
+				  # and set host to "scholar.google.com " in request headers doesn't work
+				  # So, google may has some request uri judge, We can only use self hosted dns server
+				  # to return google's server address randomly , and maintain a list of google's server
+				  # address in that dns server
 
 filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}

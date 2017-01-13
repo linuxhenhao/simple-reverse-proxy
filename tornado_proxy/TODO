@@ -47,3 +47,10 @@ done 2. deny search engine to avoid unwanted visit of google, also to decrease
 2017.01.12
 done 1. findmegoogleip can't send post to scholar.thinkeryu.com normally,solve this
  use 'and' not 'or' for check 127.0.0.1 or ::1
+
+done 2. directly using url like https://1.2.3.4/xx and set host in headers to visite 
+different google server can't work, so change to add modified name server
+
+3. socket.recfrom timeout error, try to solve it
+
+

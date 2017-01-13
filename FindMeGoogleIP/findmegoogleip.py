@@ -257,17 +257,18 @@ class DNSServer:
     map dict format {'domain',[ip,ip,ip]}
     randomly return one of the ips in ip list
     '''
-    def __init__(self,host_ip_map,upper_server):
+    def __init__(self,host_ip_map,upper_server,bind_address_tuple):
         self._host_ip_map = host_ip_map
         self._upper_name_server = upper_server
         self._resolver = dns.resolver.Resolver()
         self._resolver.nameservers = [self._upper_name_server]
         self._resolver.lifetime = 5
+        self._bind_address_tuple = bind_address_tuple
     def run(self):
         logging.debug(">>>>>>starting udp dns name server")
         try:
             udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            udp_server.bind(('127.0.0.1',53)) #only answer local queries
+            udp_server.bind(self._bind_address_tuple) #only answer local queries,set to 127.0.0.1
         except Exception, e:
             print("Failed to create socket on UDP port 53:",e)
             sys.exit(1)
@@ -289,19 +290,22 @@ class DNSServer:
             return  ip_address
 
 
-	def query_and_send_back_ip(data, addr,udp_server,host_ip_map,resolver):
-	    try:
-		p=DNSQuery(data)
-		logging.info('Request domain: %s' % p.domain)
-		ip = get_ip_address_by_domain(p.domain,host_ip_map,resolver)
-		udp_server.sendto(p.respuesta(ip), addr)
-		logging.info('Request: %s -> %s' % (p.domain, get_ip_address_by_domain(p.domain)))
-            except Exception, e:
-		print 'query for:%s error:%s' % (p.domain, e)
-        while True:
-            data, addr = udp_server.recvfrom(1024)
-            logging.debug(">>>>>>recived new dns query, starting new thread")
-            threading.Thread(target=query_and_send_back_ip,args=(data,addr,udp_server,self._host_ip_map,self._resolver))
+		def query_and_send_back_ip(data, addr, udp_server, host_ip_map, resolver):
+		    try:
+				p=DNSQuery(data)
+				logging.info('Request domain: %s' % p.domain)
+				ip = get_ip_address_by_domain(p.domain,host_ip_map,resolver)
+				udp_server.sendto(p.respuesta(ip), addr)
+				logging.info('Request: %s -> %s' % (p.domain, get_ip_address_by_domain(p.domain)))
+	        except Exception, e:
+				print 'query for:%s error:%s' % (p.domain, e)
+	    while True:
+	        data, addr = udp_server.recvfrom(1024)
+	        logging.debug(">>>>>>recived new dns query, starting new thread")
+	        thread = threading.Thread(target=query_and_send_back_ip,args=(data,addr,udp_server,self._host_ip_map,self._resolver))
+	        thread.start()
+	    udp_server.close()    
+
 
 def update_host_ip_map_daemon(shared_host_ip_dict):
     while True:
@@ -321,8 +325,8 @@ def update_google_ips(shared_host_ip_dict):
         #update shared_host_ip_dict
         shared_host_ip_dict['scholar.google.com'] = ip_list[:num_of_IPs]
 
-def run_dns_server(host_ip_map,upper_dns_server):
-    dns_server = DNSServer(host_ip_map,upper_dns_server)
+def run_dns_server(host_ip_map,upper_dns_server,bind_address_tuple):
+    dns_server = DNSServer(host_ip_map,upper_dns_server,bind_address_tuple)
     dns_server.run()
 
 if __name__ == "__main__":
@@ -338,17 +342,21 @@ if __name__ == "__main__":
 #        logging.info("Find ips in specified domains: findmegoogleip.py kr us")
 #        logging.info("=" * 50)
 #        logging.info("Now running default: find ip from a randomly chosen domain: %s" % domain[0])
-    upper_server = "208.67.222.123"
-    manager = multiprocessing.Manager()
+    upper_server = "208.67.222.123" #opendns's dns server
+    bind_address_tuple = ("127.0.0.1",53) #only accept local dns queries
+
+    manager = multiprocessing.Manager() #using manager to generate dict to share between processes
     host_ip_map = manager.dict()
+    
     logging.debug(">>>>>>updating google ip map the first time")
-    update_google_ips(host_ip_map) #generate host_ip_map first of all
+    update_google_ips(host_ip_map) 		#generate host_ip_map first of all
     logging.debug(">>>>>>starting host_ip_map update daemon process")
     host_ip_map_update_process = multiprocessing.Process(target=\
             update_host_ip_map_daemon,args=(host_ip_map,))
 
     logging.debug(">>>>>>starting dns server daemon process")
     dns_server_process = multiprocessing.Process(target=run_dns_server,\
-            args=(host_ip_map,upper_server))
+            args=(host_ip_map,upper_server,bind_address_tuple))
     host_ip_map_update_process.start()
     dns_server_process.start()
+    dns_server_process.join()
