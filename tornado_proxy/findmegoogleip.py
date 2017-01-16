@@ -345,8 +345,8 @@ if __name__ == "__main__":
 #        logging.info("Find ips in specified domains: findmegoogleip.py kr us")
 #        logging.info("=" * 50)
 #        logging.info("Now running default: find ip from a randomly chosen domain: %s" % domain[0])
-    upper_server = "208.67.222.123" #opendns's dns server
-    bind_address_tuple = ("127.0.0.1",53) #only accept local dns queries
+    upper_server = dns_settings.upper_dns_server #opendns's dns server
+    bind_address_tuple =  dns_settings.bind_tuple #only accept local dns queries
 
     manager = multiprocessing.Manager() #using manager to generate dict to share between processes
     host_ip_map = manager.dict()

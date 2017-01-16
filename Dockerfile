@@ -14,10 +14,7 @@ RUN apk add py-curl
 RUN git clone -b urlredirect https://github.com/linuxhenhao/tornado_proxy.git
 RUN pip install -r tornado_proxy/requirements.txt
 
-WORKDIR /root/tornado_proxy
-RUN rm /etc/resolv.conf
-RUN cp ./resolv.conf /etc/resolv.conf
-CMD sh /root/tornado_proxy/run_dns_tornado_in_docker.sh
+CMD python /root/tornado_proxy/tornado_proxy/proxy.py
 
 EXPOSE 443
 EXPOSE 80

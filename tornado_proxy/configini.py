@@ -64,4 +64,8 @@ class DNSServerSettings:
 #    'http': 'http://127.0.0.1:8087',
 #    'https': 'http://127.0.0.1:8087',
 #}
+# upper dns name server
+        self.upper_dns_server = "208.67.222.123" #openDNS's server
+# dns server bind address
+        self.bind_tuple = ("172.17.0.1",53) #for docker container
 dns_settings = DNSServerSettings()
