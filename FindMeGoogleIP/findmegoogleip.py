@@ -338,7 +338,7 @@ if __name__ == "__main__":
                 pass
             def run(self):
                 logging.debug("for debug, only return a empty list")
-                return ['1','2']
+                return ['1.2.3.4','2.2.3.4']
     else:
         logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
     if len(sys.argv) >= 2:
