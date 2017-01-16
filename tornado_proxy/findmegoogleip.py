@@ -255,6 +255,7 @@ class DNSServer:
         logging.debug(">>>>>>starting udp dns name server")
         try:
             udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            udp_server.settimeout(None) #set timeout to none,listen all the time
             udp_server.bind(self._bind_address_tuple) #only answer local queries,set to 127.0.0.1
         except Exception, e:
             print("Failed to create socket on UDP port 53:",e)
