@@ -46,3 +46,22 @@ util_log_level = logging.ERROR
 logger_level = logging.DEBUG #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
+
+class DNSServerSettings:
+    def __init__(self):
+# debug flag for running dns name server
+# set to True to show more debug messages
+        self.debug = False
+# the number of threads(dns query or ssl service check) running concurrently
+        self.threads = 100
+
+# the maximum number of dns servers to query in a certain country
+        self.servers = 800
+
+# Set the proxies to access public dns website if this variable is not None
+        self.proxies = None
+#proxies = {
+#    'http': 'http://127.0.0.1:8087',
+#    'https': 'http://127.0.0.1:8087',
+#}
+dns_settings = DNSServerSettings()

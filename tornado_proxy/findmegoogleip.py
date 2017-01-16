@@ -11,7 +11,7 @@ import dns.resolver
 import dns.exception
 import os
 import urllib2
-import settings
+from configini import dns_settings
 import logging
 import json
 import multiprocessing
@@ -37,7 +37,7 @@ class FindMeGoogleIP:
     def run_threads(self, threads, limit=None):
         """A general way to run multiple threads"""
         if not limit:
-            limit = settings.threads
+            limit = dns_settings.threads
         lock = threading.Lock()
         total = len(threads)
         for index, thread in enumerate(threads):
@@ -65,7 +65,7 @@ class FindMeGoogleIP:
                     if data:
                         servers = re.split('\s+', data)
                         random.shuffle(servers)
-                        for server in servers[:settings.servers]:
+                        for server in servers[:dns_settings.servers]:
                             self.dns_servers.append((server, location))
         except IOError:
             logging.error("Cannot read dns servers")
@@ -116,20 +116,6 @@ class FindMeGoogleIP:
             logging.info("No available servers found")
             return None
 
-    def write_into_gae_user_json(self):
-        if os.path.isfile(settings.gae_user_json_file) is None:
-            return
-        if not os.path.isfile(settings.gae_user_json_file):
-            logging.error("%s does not exist" % (settings.gae_user_json_file,))
-            return
-
-        with open(settings.gae_user_json_file) as f:
-            config = json.load(f)
-            config['HostMap']['google_hk'] = self.json_result
-
-        with open(settings.gae_user_json_file, 'w') as f:
-            json.dump(config, f, sort_keys=True, indent=4, separators=(',', ': '))
-            logging.info('Written into %s' % (settings.gae_user_json_file,))
 
     def run(self):
         self.get_dns_servers()
@@ -137,7 +123,6 @@ class FindMeGoogleIP:
         self.check_service()
         # self.cleanup_low_quality_ips()
         return self.get_results()
-        #self.write_into_gae_user_json()
 
     def update_dns_files(self):
         threads = [DNSServerFileDownload(location) for location in FindMeGoogleIP.read_domains()]
@@ -156,7 +141,7 @@ class DNSServerFileDownload(threading.Thread):
     def run(self):
         try:
             logging.info('downloading file %s' % self.url)
-            proxy_handler = urllib2.ProxyHandler(proxies=settings.proxies)
+            proxy_handler = urllib2.ProxyHandler(proxies=dns_settings.proxies)
             opener = urllib2.build_opener(proxy_handler)
             data = opener.open(self.url, timeout=5).read().decode()
             with open(self.file, mode='w') as f:
@@ -337,7 +322,7 @@ def run_dns_server(host_ip_map,upper_dns_server,bind_address_tuple):
     dns_server.run()
 
 if __name__ == "__main__":
-    DEBUG = False
+    DEBUG = dns_settings.debug
     if(DEBUG):
         logging.basicConfig(format='%(message)s', level=logging.DEBUG)
         class FindMeGoogleIP:
