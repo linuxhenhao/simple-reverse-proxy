@@ -320,7 +320,7 @@ def update_google_ips(shared_host_ip_dict):
         print('No available ip found')
     else:
         print(ip_list)
-        IPs = int(len(ip_list)/3)
+        IPs = 1 if int(len(ip_list)/3)==0 else int(len(ip_list/3))
         num_of_IPs = 100 if IPs > 100 else IPs
         #update shared_host_ip_dict
         shared_host_ip_dict['scholar.google.com'] = ip_list[:num_of_IPs]
@@ -330,7 +330,17 @@ def run_dns_server(host_ip_map,upper_dns_server,bind_address_tuple):
     dns_server.run()
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+    DEBUG = True
+    if(DEBUG):
+        logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+        class FindMeGoogleIP:
+            def __init__(self,domain):
+                pass
+            def run(self):
+                logging.debug("for debug, only return a empty list")
+                return ['1','2']
+    else:
+        logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
     if len(sys.argv) >= 2:
         if sys.argv[1] == 'update':
             FindMeGoogleIP([]).update_dns_files()
