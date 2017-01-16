@@ -1,0 +1,56 @@
+DONE:
+>now google will do bot check every first time a browser open scholar.
+>google.com from my vps server, So I need solve this problem by deal
+>with the 'Location' returned by the scholar.google.com
+>
+>Now,Location replace by my own ipv4.xxx.com is working.
+>But when fetch_url do fetch from ipv4.google.com,though the server
+>return the bot check image and other content, the HTTPResponse.code
+>is 503.
+>/////Tornado think this is an erro and abort the fetch work,
+>/////SOLVE THIS!!!
+>
+>test url:
+>http://ipv4.thinkeryu.com/sorry/IndexRedirect?continue=https://scholar.>google.
+>com/&q=CGMSBC0gNfEYw-e3vwUiGQDxp4NL89qc5EbOuVmCLY-ahywAzc5W6pY
+>
+>error message:
+>ERROR:tornado.access:503 GET https://ipv4.google.com/sorry/IndexRedirect?
+>continue=https://scholar.google.com/&q=CGMSBC0gNfEYw-e3vwUiGQDxp4NL89qc5E
+>bOuVmCLY-ahywAzc5W6pY (1.83.124.40) 423.35ms
+>
+>
+The problem above seems to be solved,test another time
+
+
+----------------
+new
+done 1. using config.py to replace the site.conf to enable more
+flexiable and more complex configuration
+done 2. add https support option in configartion
+done 3. implement an http to https redirect location handler, only
+handle get method
+
+done 4. do not delete Referer in Request headers just replace it
+back to what our sites proxy for.
+
+--------
+2017.01.11
+done 1. add more google's ip address for random choose to avoid bot check of google
+:use findmegoogleip to fetch new available google's server ip,and use urllib2
+to post new ip to proxy.py,proxy.py use a handler to update selfresolve dict
+in proxyHandler's global property list. make sure only update post from local ip
+will be accepted
+done 2. deny search engine to avoid unwanted visit of google, also to decrease
+   google's bot check
+
+2017.01.12
+done 1. findmegoogleip can't send post to scholar.thinkeryu.com normally,solve this
+ use 'and' not 'or' for check 127.0.0.1 or ::1
+
+done 2. directly using url like https://1.2.3.4/xx and set host in headers to visite 
+different google server can't work, so change to add modified name server
+
+3. socket.recfrom timeout error, try to solve it
+
+

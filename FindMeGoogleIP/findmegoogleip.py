@@ -240,6 +240,8 @@ class DNSQuery:
                 lon=ord(data[ini])
 
     def respuesta(self, ip):
+        logging.debug("In DNSQuery's respuesta,gen return packte \
+                for %s"%ip)
         packet=''
         if self.domain:
             packet+=self.data[:2] + "\x81\x80"
@@ -286,7 +288,7 @@ class DNSServer:
                 for response in answer:
                     ip_address = str(response)
                     #only return the last ip in query answer
-            logging.debug(">>>>>>domain %s's ip is %s"%ip_address)
+            logging.debug(">>>>>>domain %s's ip is %s"%(domain,ip_address))
             return  ip_address
 
 
@@ -296,7 +298,6 @@ class DNSServer:
                 logging.info('Request domain: %s' % p.domain)
                 ip = get_ip_address_by_domain(p.domain,host_ip_map,resolver)
                 udp_server.sendto(p.respuesta(ip), addr)
-                logging.info('Request: %s -> %s' % (p.domain, get_ip_address_by_domain(p.domain)))
             except Exception, e:
                 print 'query for:%s error:%s' % (p.domain, e)
         while True:
@@ -320,8 +321,14 @@ def update_google_ips(shared_host_ip_dict):
         print('No available ip found')
     else:
         print(ip_list)
-        IPs = 1 if int(len(ip_list)/3)==0 else int(len(ip_list/3))
-        num_of_IPs = 100 if IPs > 100 else IPs
+        IPs = int(len(ip_list)/3)
+        if(IPs < 50):
+            num_of_IPs = len(ip_list)
+        elif(IPs > 100):
+            num_of_IPs = 100
+        else:
+            num_of_IPs = IPs
+        logging.debug("num_of_ips is %d "%num_of_IPs)
         #update shared_host_ip_dict
         shared_host_ip_dict['scholar.google.com'] = ip_list[:num_of_IPs]
 
@@ -330,7 +337,7 @@ def run_dns_server(host_ip_map,upper_dns_server,bind_address_tuple):
     dns_server.run()
 
 if __name__ == "__main__":
-    DEBUG = True
+    DEBUG = False
     if(DEBUG):
         logging.basicConfig(format='%(message)s', level=logging.DEBUG)
         class FindMeGoogleIP:
@@ -338,7 +345,8 @@ if __name__ == "__main__":
                 pass
             def run(self):
                 logging.debug("for debug, only return a empty list")
-                return ['1.2.3.4','2.2.3.4']
+                return ['1.2.3.4','2.2.3.4','3.4.5.6','7.8.9.10',
+                '8.9.10.11','9.10.11.12']
     else:
         logging.basicConfig(format='%(message)s', level=logging.CRITICAL)
     if len(sys.argv) >= 2:
