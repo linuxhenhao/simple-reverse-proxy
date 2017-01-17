@@ -90,7 +90,7 @@ class UpdateHandler(tornado.web.RequestHandler):
     def initialize(self,selfresolve_dict):
         self.host_dict = selfresolve_dict
     def post(self):
-        logger.info('in update handler,handle request %s'%self.request)
+        logger.debug('in update handler,handle request %s'%self.request)
         self.headers = tornado.httputil.HTTPHeaders()
 
         if(self.request.remote_ip != '127.0.0.1' and self.request.remote_ip\
@@ -104,7 +104,7 @@ class UpdateHandler(tornado.web.RequestHandler):
         response = ''
         if(self.request.headers['Content-Type'].lower() == 'application/json'):
             recived_dict = json.loads(self.request.body)
-            logger.info('recived_dict is %s'%recived_dict)
+            logger.debug('recived_dict is %s'%recived_dict)
             for key in recived_dict.keys():
                 self.host_dict[key] = recived_dict[key]
                 response += 'set key '+key+' to '+json.dumps(recived_dict[key])
@@ -239,21 +239,22 @@ class ProxyHandler(tornado.web.RequestHandler):
             self.request.uri=self.request.protocol+"://"+self.request.host+self.request.uri
 
 
-        logger.debug('Handle %s request to %s', self.request.method,
-                     self.request.uri)
+        logger.info('Handle %s request to %s from %s UA: %s',
+                self.request.method,self.request.uri,
+                self.request.remote_ip,self.request.headers['User-Agent'])
 
 
         def handle_response(response):
-            logger.info('>>>in handle response')
+            logger.debug('>>>in handle response')
             if (response.error and not \
                     isinstance(response.error, tornado.httpclient.HTTPError)):
                 self.set_status(500)
                 self.write('Internal server error:\n' + str(response.error))
             else:
-                logger.info('>>>in else')
+                logger.debug('>>>in else')
                 self.set_status(response.code, response.reason)
                 self._headers = tornado.httputil.HTTPHeaders() # clear tornado default header
-                logger.info('>>>before filt_content')
+                logger.debug('>>>before filt_content')
                 response_body=self._filter.filt_content(self.url_before_selfresolve,response)
 
                 logger.debug("response's headers")
@@ -265,7 +266,7 @@ class ProxyHandler(tornado.web.RequestHandler):
 
 
                 if response_body:
-                    logger.info('>>>before write response body')
+                    logger.debug('>>>before write response body')
                     self.set_header('Content-Length', len(response_body))
                     self.write(response_body)
             self.finish()
@@ -329,7 +330,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.write('Internal server error:\n')
                 self.finish()
             else:
-                logger.info("request after urlredirect %s"% self.request)
+                logger.debug("request after urlredirect %s"% self.request)
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
