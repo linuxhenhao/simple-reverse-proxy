@@ -121,6 +121,7 @@ class FileHandler(tornado.web.RequestHandler):
     def compute_etag(self):
         return None #disable tornado Etag
     def initialize(self,server_static_root):
+        logger.debug("static root dir is %s"%server_static_root)
         self.server_static_root = server_static_root
 
     @tornado.web.asynchronous
@@ -153,6 +154,7 @@ class FileHandler(tornado.web.RequestHandler):
         match_result=host_pattern.match(self.request.uri)
         if(match_result!=None): #has host info in uri, 'https?://xxx/xxx' format
             file_location = self.server_static_root  + self.request.uri[match_result.end:]
+            logger.debug("requested file is %s"%file_location)
         else:
             file_location = self.server_static_root + self.request.uri
         if(os.path.exists(file_location)): #file exists

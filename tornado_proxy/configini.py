@@ -47,6 +47,8 @@ logger_level = logging.DEBUG #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
 
+
+#--------------------------------------------------------------------------
 class DNSServerSettings:
     def __init__(self):
 # debug flag for running dns name server
