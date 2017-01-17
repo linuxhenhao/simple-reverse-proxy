@@ -152,6 +152,7 @@ class FileHandler(tornado.web.RequestHandler):
         #check url format to cut host and https? part first
         host_pattern=re.compile("(https?://[^/]+)")
         match_result=host_pattern.match(self.request.uri)
+        logger.debug("get file descriptor from uri %s"%self.request.uri)
         if(match_result!=None): #has host info in uri, 'https?://xxx/xxx' format
             file_location = self.server_static_root  + self.request.uri[match_result.end:]
             logger.debug("requested file is %s"%file_location)
