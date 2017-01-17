@@ -129,6 +129,8 @@ class FileHandler(tornado.web.RequestHandler):
         logger.debug("file handler handler request uri %s"%self.request.uri)
         self.headers = tornado.httputil.HTTPHeaders()
         file_size = self.get_file_descriptor_by_uri()
+        logger.debug("file size after get file descriptor: %d"%file_size)
+
         if( file_size != 0): # True if get file descriptor success
             self.set_status(200)
             self.set_header('Content-Length', file_size)
