@@ -159,7 +159,9 @@ class FileHandler(tornado.web.RequestHandler):
             file_location = self.server_static_root  + self.request.uri[match_result.end:]
             logger.debug("requested file is %s"%file_location)
         else:
+            logger.debug("uri is %s,no re match"%self.request.uri)
             file_location = self.server_static_root + self.request.uri
+            logger.debug("file_location is %s"%file_location)
         if(os.path.exists(file_location)): #file exists
             self.file_descriptor = open(file_location)
             return os.path.getsize(file_location)
