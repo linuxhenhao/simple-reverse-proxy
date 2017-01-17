@@ -4,8 +4,8 @@ import os,logging
 
 https_enabled = True
 
-pwd = os.path.dirname(os.path.realpath(__file__))+'/'
-
+server_root = os.path.dirname(os.path.realpath(__file__))+'/'
+pwd = server_root
 if(os.path.exists('/etc/INDOCKER')): #in an docker container
     pwd = '/media/'
     fullchain_cert_path = pwd+'fullchain1.pem'
@@ -16,7 +16,7 @@ else:
 
 server_name = '.*thinkeryu.com' #using in add_handler's host pattern for virtual host
 
-server_static_root = './static/'
+server_static_root = server_root +'/static/'
 #url replace rules
 scihub_self = 'scihub.thinkeryu.com'
 
