@@ -11,4 +11,4 @@ cp /root/tornado_proxy/Dockerfile /root/docker/
 cd /root
 docker build --no-cache -t scihub ./docker
 
-docker --dns=172.17.0.1 run --name scihub_container -v /etc/letsencrypt/archive/scholar.thinkeryu.com/:/media/ -p 80:80 -p 443:443 scihub
+docker --dns=172.17.0.1 run --name scihub_container -v /etc/letsencrypt/live/scholar.thinkeryu.com/:/media/ -p 80:80 -p 443:443 scihub
