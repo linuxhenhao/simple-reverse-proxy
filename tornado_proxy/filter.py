@@ -119,7 +119,7 @@ class Myfilter:
                         continue
 
                     #has res_url,go to add a content <a ...
-                    more_a=item.find(name='a',attrs={"class":"gs_nph")})
+                    more_a=item.find(name='a',attrs={"class":"gs_nph"})
                     if(more_a==None):
                         continue
 #generate new tag to add after more
