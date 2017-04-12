@@ -53,8 +53,8 @@ def replace_to_originalhost(selfhost_url,to_original_rules):
     if(host != None):
         origin_host = to_original_rules.get(host)
         if(origin_host != None):
-        return origin_host+\
-                selfhost_url[just_after_host_position:]
+            return origin_host+\
+                    selfhost_url[just_after_host_position:]
     else: # cannot get host from selfhost_url
         return None
 
