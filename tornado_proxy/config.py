@@ -97,7 +97,10 @@ class configurations:
         self._replace_to_originalhost_rules = dict()
 
         for origin,selfhost in self._rules_source:
-            origin_host,trash = util.get_host_from_url(origin) #return host,just_after_host_position tuple
+            try:
+                origin_host,trash = util.get_host_from_url(origin) #return host,just_after_host_position tuple
+            except: #get host from url failed
+                origin_host=None
             #selfhost is already in xxx.xxx.com[:port] format
             if(origin_host and selfhost): # both of them are not None
                 self._replace_to_seflhost_rules[origin_host] = self._selfhost_proto+"://"+selfhost

@@ -34,13 +34,14 @@ def replace_to_selfhost(origin_url,to_selfhost_rules):
     rules like dict{'original_host':selfhost_url,}
     original_host include port if it has
     '''
-    host,just_after_host_position=get_host_from_url(origin_url)
-    if ( host != None):
+    try:
+        host,just_after_host_position=get_host_from_url(origin_url)
         selfhost = to_selfhost_rules.get(host)
         if(selfhost != None):
             return selfhost+ \
                     origin_url[just_after_host_position:]
-    else: # cannot get host from origin url
+        return None
+    except: #cannot get host from url
         return None
 
 def replace_to_originalhost(selfhost_url,to_original_rules):
@@ -49,13 +50,14 @@ def replace_to_originalhost(selfhost_url,to_original_rules):
     rules like dict{'selfhost':original_url,}
     selfhost also include port if it exist
     '''
-    host,just_after_host_position=get_host_from_url(selfhost_url)
-    if(host != None):
+    try:
+        host,just_after_host_position=get_host_from_url(selfhost_url)
         origin_host = to_original_rules.get(host)
         if(origin_host != None):
             return origin_host+\
                     selfhost_url[just_after_host_position:]
-    else: # cannot get host from selfhost_url
+        return None
+    except:
         return None
 
 def get_host_from_url(url):
@@ -78,7 +80,7 @@ def get_host_from_url(url):
         dot_position = host_without_port.rfind('.')
         if(dot_position < len(host_without_port)-1):
             return host,just_after_host_position
-    return None
+    raise HostNotFoundError(url)
 
 def load_cookie(headers):
     c = Cookie.SimpleCookie()

@@ -278,7 +278,10 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.request.uri = target_url
 
                 #replace self.request.headers['Host']
-                target_host,trash = util.get_host_from_url(self._replace_to_originalhost_rules[self.request.host])
+                try:
+                    target_host,trash = util.get_host_from_url(self._replace_to_originalhost_rules[self.request.host])
+                except:
+                    pass
                 self.request.headers['Host'] = target_host
                 self.request.host = target_host
 
