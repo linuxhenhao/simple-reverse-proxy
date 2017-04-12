@@ -79,6 +79,7 @@ class Myfilter:
                     if(replaced_url != None ):
                         logger.debug("original url: %s replaced to %s"%(href,replaced_url))
                         a['href'] = replaced_url
+                        logger.debug(">>>soup:\n %s"%(str(soup)))
 
 
     def filt_ipv4(self,response,soup,filt_configs=None,**kwards): #url replace for ipv4.google.com
