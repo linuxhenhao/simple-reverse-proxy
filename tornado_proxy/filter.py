@@ -40,7 +40,7 @@ class Myfilter:
 ############## check done, now going to replace original hosts in all <a> links to selfhost
         soup=BeautifulSoup(response.body,"html.parser")
         if(self._replace_host(soup)): # replace occured
-            resonse_body = str(soup)
+            response_body = str(soup)
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
                 filt_name = self._regexs4select_filter[url_pattern]
@@ -51,6 +51,7 @@ class Myfilter:
                     return_body = getattr(self,filt_name)(response,soup,**kwargs)
                 if(return_body!=None):
                     response_body=return_body
+
         return response_body
     def _get_content_type_from_response(self,response):
         try:
