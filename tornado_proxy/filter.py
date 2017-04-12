@@ -119,19 +119,16 @@ class Myfilter:
                         continue
 
                     #has res_url,go to add a content <a ...
-                    more_a=item.find(name='a',attrs={"class":re.compile("gs_mor.*")})
+                    more_a=item.find(name='a',attrs={"class":"gs_nph")})
                     if(more_a==None):
                         continue
 #generate new tag to add after more
                     down_a=soup.new_tag('a')
                     down_a.string=u"下载"
                     down_a['href']=self._host_proto + '://' + scihub_host+'/'+res_url
-                    down_a['class']="gs_nph"
                     down_a['target']='_blank' #open in new tab
                     #insert the down_a after more_a
-                    more_a.insert_after(down_a)
-            else:
-                return
+                    more_a.insert_before(down_a)
 
             return str(soup) #response.body can't change,so return it
 
