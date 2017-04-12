@@ -9,8 +9,7 @@ import os,logging
 #####################################
 https_enabled = True
 
-server_root = os.path.dirname(os.path.realpath(__file__))+'/'
-pwd = server_root
+pwd = '/etc/letsencrypt/live/scholar.thinkeryu.com/'
 if(os.path.exists('/etc/INDOCKER')): #in an docker container
     pwd = '/media/live/scholar.thinkeryu.com/'
     fullchain_cert_path = pwd+'fullchain.pem'
