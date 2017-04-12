@@ -2,6 +2,11 @@
 #-*- coding:utf-8 -*-
 import os,logging
 
+#####################################
+#
+# host default means host(with port)
+#
+#####################################
 https_enabled = True
 
 server_root = os.path.dirname(os.path.realpath(__file__))+'/'

@@ -36,8 +36,10 @@ def replace_to_selfhost(origin_url,to_selfhost_rules):
     '''
     host,just_after_host_position=get_host_from_url(origin_url)
     if ( host != None):
-        return to_selfhost_rules[host]+ \
-            origin_url[just_after_host_position:]
+        selfhost = to_selfhost_rules.get(host)
+        if(selfhost != None):
+            return selfhost+ \
+                    origin_url[just_after_host_position:]
     else: # cannot get host from origin url
         return None
 
@@ -49,7 +51,9 @@ def replace_to_originalhost(selfhost_url,to_original_rules):
     '''
     host,just_after_host_position=get_host_from_url(selfhost_url)
     if(host != None):
-        return to_original_rules[host]+\
+        origin_host = to_original_rules.get(host)
+        if(origin_host != None):
+        return origin_host+\
                 selfhost_url[just_after_host_position:]
     else: # cannot get host from selfhost_url
         return None
