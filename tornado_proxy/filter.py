@@ -32,6 +32,11 @@ class Myfilter:
         if( content_type.lower().find('text/html') == -1):
             logger.debug("content_type is %s, do nothing"% content_type)
             return response_body
+        if(response.body==None or len(response.body)<=10 ):
+            logger.debug("response.body is empty or none, do nothing in filter")
+            return  response_body                #no page,do nothing,the same as follow situation
+                                    #  too short not a html page,do nothing
+
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
                 filt_name = self._regexs4select_filter[url_pattern]
@@ -121,10 +126,6 @@ class Myfilter:
     def filt_scihub(self,response,filt_configs=None,**kwargs):
         #if('location' in response.request.headers):
         #    None
-        if(response.body==None):
-            return                  #no page,do nothing,the same as follow situation
-        if(len(response.body)<=10): #too short not a html page,do nothing
-            return
         soup=BeautifulSoup(response.body,'html.parser')
         try:
             save=soup.findAll('div',attrs={'id':'save'})[0]
@@ -144,3 +145,22 @@ class Myfilter:
         save.a.string=u'下载链接'
         download_link_h3.insert(1,save.a)
         return str(new_download_soup)
+
+    def filt_googlecontent(self,response,filt_configs=None,**kwargs):
+        soup=BeautifulSoup(response.body,'html.parser')
+        try:
+            save = soup.findAll('a',attrs={'class':'gs_citi'})
+        except: # findAll caught in exception, nothing in save ,just return
+            return
+        if (len(save) == 0):  #cannot find any links in class gs_citi return
+            return
+        #links in class gs_citi found, deal with them
+        for link in save:
+            url = link.get('href')
+            if(url != None): # link has href attribute
+                selfhost_url = util.replace_to_selfhost(url)
+                if(selfhost_url != None): # replace succed
+                    link['href'] = selfhost_url
+                #else, nothing need to be done, because url don't contain host,
+                #things can work as we want
+        return str(soup)
