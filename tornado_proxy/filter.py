@@ -97,35 +97,41 @@ class Myfilter:
             logger.debug('In filt_scholar>>>>>>>>>>>')
             logger.debug(">>>soup:\n %s"%(str(soup)))
             scihub_host=filt_configs['scihub_host']
+            citation_links = soup.findAll('a',attrs={'class':'gs_citi'})
+            if(len(citation_links) != 0): # citation links found
+                for link in citation_links:
+                    link['target'] = "_blank" # open citation page in new tab
+
 
             answer_list=soup.findAll(attrs={"class":"gs_r"})
-            if(len(answer_list)==0): #no gs_ri,no available resources
-                return
-            for item in answer_list: #every item is a block contains [h3 header|brief content|some operations]
-                item=item.find(attrs={"class":"gs_ri"})
-                if(item==None): #no gs_ri found,continue
-                    continue
-                if(item.h3==None): #not paper or patent block,ignore
-                    continue
-                if(item.h3.a==None): #no resource url,continue
-                    continue
+            if(len(answer_list) != 0): # gs_ri, available resources found
+                for item in answer_list: #every item is a block contains [h3 header|brief content|some operations]
+                    item=item.find(attrs={"class":"gs_ri"})
+                    if(item==None): #no gs_ri found,continue
+                        continue
+                    if(item.h3==None): #not paper or patent block,ignore
+                        continue
+                    if(item.h3.a==None): #no resource url,continue
+                        continue
 
-                res_url=item.h3.a.get("href") #the resource's url
-                if(res_url==None):#no href attr,skip
-                    continue
+                    res_url=item.h3.a.get("href") #the resource's url
+                    if(res_url==None):#no href attr,skip
+                        continue
 
-                #has res_url,go to add a content <a ...
-                more_a=item.find(name='a',attrs={"class":re.compile("gs_mor.*")})
-                if(more_a==None):
-                    continue
+                    #has res_url,go to add a content <a ...
+                    more_a=item.find(name='a',attrs={"class":re.compile("gs_mor.*")})
+                    if(more_a==None):
+                        continue
 #generate new tag to add after more
-                down_a=soup.new_tag('a')
-                down_a.string=u"下载"
-                down_a['href']=self._host_proto + '://' + scihub_host+'/'+res_url
-                down_a['class']="gs_nph"
-                down_a['target']='_blank' #open in new tab
-                #insert the down_a after more_a
-                more_a.insert_after(down_a)
+                    down_a=soup.new_tag('a')
+                    down_a.string=u"下载"
+                    down_a['href']=self._host_proto + '://' + scihub_host+'/'+res_url
+                    down_a['class']="gs_nph"
+                    down_a['target']='_blank' #open in new tab
+                    #insert the down_a after more_a
+                    more_a.insert_after(down_a)
+            else:
+                return
 
             return str(soup) #response.body can't change,so return it
 
