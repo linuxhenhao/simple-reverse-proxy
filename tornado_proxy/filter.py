@@ -44,7 +44,7 @@ class Myfilter:
             if(url_pattern.match(url)!=None): #in filter rules
                 filt_name = self._regexs4select_filter[url_pattern]
                 if(self._filters_configs.has_key(filt_name)):
-                    return_body = getattr(self,filt_name)(response,soup\
+                    return_body = getattr(self,filt_name)(response,soup,\
                         self._filters_configs[filt_name], **kwargs)
                 else:
                     return_body = getattr(self,filt_name)(response,soup,**kwargs)
