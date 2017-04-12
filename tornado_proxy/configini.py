@@ -36,8 +36,8 @@ rules_source = [
 
 regexs4select_filter_source = {'https?://scholar\.google\..*':'filt_scholar',
                 'https?://ipv4\.google\..*':'filt_ipv4',
-                'https?://.*sci-hub\.bz':'filt_scihub',
-                'https?://scholar\.googlecontent\..*':'filt_googlecontent'}
+                'https?://.*sci-hub\.bz':'filt_scihub'
+                }
 # selfresolve format
 # {'host_name':ip_addrs_list}
 # if there is more than one item in ip_addrs_list
@@ -52,7 +52,7 @@ filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}
 
 util_log_level = logging.ERROR
-logger_level = logging.INFO #proxy.py's log
+logger_level = logging.DEBUG#proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
 

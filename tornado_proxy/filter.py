@@ -37,14 +37,17 @@ class Myfilter:
             return  response_body                #no page,do nothing,the same as follow situation
                                     #  too short not a html page,do nothing
 
+############## check done, now going to replace original hosts in all <a> links to selfhost
+        soup=BeautifulSoup(response.body,"html.parser")
+        self._replace_host(soup)
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
                 filt_name = self._regexs4select_filter[url_pattern]
                 if(self._filters_configs.has_key(filt_name)):
-                    return_body = getattr(self,filt_name)(response,\
+                    return_body = getattr(self,filt_name)(response,soup\
                         self._filters_configs[filt_name], **kwargs)
                 else:
-                    return_body = getattr(self,filt_name)(response,**kwargs)
+                    return_body = getattr(self,filt_name)(response,soup,**kwargs)
                 if(return_body!=None):
                     response_body=return_body
         return response_body
@@ -74,25 +77,20 @@ class Myfilter:
                 if(href!=None):
                     replaced_url = util.replace_to_selfhost(href,self._replace_to_selfhost_rules)
                     if(replaced_url != None ):
+                        logger.debug("original url: %s replaced to %s"%(href,replaced_url))
                         a['href'] = replaced_url
 
 
-    def filt_ipv4(self,response,filt_configs=None,**kwards): #url replace for ipv4.google.com
+    def filt_ipv4(self,response,soup,filt_configs=None,**kwards): #url replace for ipv4.google.com
             if(response.body==None or len(response.body)<10):
                 return
-            soup=BeautifulSoup(response.body,"html.parser")
 
-#replace all real_shcolar_host to self_scholar_host
-            self._replace_host(soup)
             return str(soup)
-    def filt_scholar(self,response,filt_configs=None,**kwards): #scholar's filter
+    def filt_scholar(self,response,soup,filt_configs=None,**kwards): #scholar's filter
 
             logger.debug('In filt_scholar>>>>>>>>>>>')
             scihub_host=filt_configs['scihub_host']
-            soup=BeautifulSoup(response.body,"html.parser")
 
-#replace all real_shcolar_host to self_scholar_host
-            self._replace_host(soup)
             answer_list=soup.findAll(attrs={"class":"gs_r"})
             if(len(answer_list)==0): #no gs_ri,no available resources
                 return
@@ -121,12 +119,12 @@ class Myfilter:
                 down_a['target']='_blank' #open in new tab
                 #insert the down_a after more_a
                 more_a.insert_after(down_a)
+
             return str(soup) #response.body can't change,so return it
 
-    def filt_scihub(self,response,filt_configs=None,**kwargs):
+    def filt_scihub(self,response,soup,filt_configs=None,**kwargs):
         #if('location' in response.request.headers):
         #    None
-        soup=BeautifulSoup(response.body,'html.parser')
         try:
             save=soup.findAll('div',attrs={'id':'save'})[0]
         except: #cannot find save div,means no the webpage we predicted,so do noting
@@ -146,8 +144,7 @@ class Myfilter:
         download_link_h3.insert(1,save.a)
         return str(new_download_soup)
 
-    def filt_googlecontent(self,response,filt_configs=None,**kwargs):
-        soup=BeautifulSoup(response.body,'html.parser')
+    def _replace_googlecontent_to_selfhost(self,soup):
         try:
             save = soup.findAll('a',attrs={'class':'gs_citi'})
         except: # findAll caught in exception, nothing in save ,just return
@@ -163,4 +160,3 @@ class Myfilter:
                     link['href'] = selfhost_url
                 #else, nothing need to be done, because url don't contain host,
                 #things can work as we want
-        return str(soup)
