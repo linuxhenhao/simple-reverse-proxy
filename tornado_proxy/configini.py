@@ -9,6 +9,7 @@ import os,logging
 #####################################
 https_enabled = True
 
+server_root = os.path.dirname(__file__)
 pwd = '/etc/letsencrypt/live/scholar.thinkeryu.com/'
 if(os.path.exists('/etc/INDOCKER')): #in an docker container
     pwd = '/media/live/scholar.thinkeryu.com/'
