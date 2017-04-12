@@ -39,7 +39,8 @@ class Myfilter:
 
 ############## check done, now going to replace original hosts in all <a> links to selfhost
         soup=BeautifulSoup(response.body,"html.parser")
-        self._replace_host(soup)
+        if(self._replace_host(soup)): # replace occured
+            resonse_body = str(soup)
         for url_pattern in self._regexs4select_filter.keys():
             if(url_pattern.match(url)!=None): #in filter rules
                 filt_name = self._regexs4select_filter[url_pattern]
@@ -72,6 +73,7 @@ class Myfilter:
 
     def _replace_host(self,soup):
             a_list=soup.findAll('a')
+            replaced = False
             for a in a_list:
                 href=a.get('href')
                 if(href!=None):
@@ -79,7 +81,9 @@ class Myfilter:
                     if(replaced_url != None ):
                         logger.debug("original url: %s replaced to %s"%(href,replaced_url))
                         a['href'] = replaced_url
+                        replaced = True
                         logger.debug(">>>soup:\n %s"%(str(soup)))
+            return replaced
 
 
     def filt_ipv4(self,response,soup,filt_configs=None,**kwards): #url replace for ipv4.google.com
@@ -90,6 +94,7 @@ class Myfilter:
     def filt_scholar(self,response,soup,filt_configs=None,**kwards): #scholar's filter
 
             logger.debug('In filt_scholar>>>>>>>>>>>')
+            logger.debug(">>>soup:\n %s"%(str(soup)))
             scihub_host=filt_configs['scihub_host']
 
             answer_list=soup.findAll(attrs={"class":"gs_r"})
