@@ -445,7 +445,7 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     (r'/',FileHandler,dict(server_static_root=configurations.server_static_root,
     main_host=configurations.main_host)
     ),
-    (r'.*', ProxyHandler,handler_initialize_dict)
+    (r'.*', ProxyHandler,handler_initialize_dict
     )
     ])
 
