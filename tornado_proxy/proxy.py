@@ -127,7 +127,7 @@ class FileHandler(tornado.web.RequestHandler):
         logger.debug("main host is {}".format(self.main_host))
 
     @tornado.web.asynchronous
-    def get(self):
+    def get(self, filename=None):
         logger.debug("FileHandler handle request uri %s"%self.request.uri)
         self.headers = tornado.httputil.HTTPHeaders()
         if(self.main_host is not None):  # request only get '/'
