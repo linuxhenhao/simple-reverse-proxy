@@ -439,23 +439,18 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
+    (r'/.*\.(txt|html|png)',FileHandler,dict(server_static_root=configurations.server_static_root)
     (r'/',FileHandler,dict(server_static_root=configurations.server_static_root,
     main_host=configurations.main_host)
     ),
-    (r'/.*\.(txt|html|png)',FileHandler,dict(server_static_root=configurations.server_static_root)
     ),
-    (r'.*', HttpHandler,dict(rules=configurations.replace_to_originalhost_rules)
+    (r'.*', ProxyHandler,dict(rules=configurations.replace_to_originalhost_rules)
     )
     ])
 
     if(configurations.https_enabled): #https_enabled
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
-        (r'/',FileHandler,dict(server_static_root=configurations.server_static_root,
-        main_host=configurations.main_host)
-        ),
-        (r'/.*\.(txt|html|png)',FileHandler,dict(server_static_root=configurations.server_static_root)
-        ),
         (r'.*', HttpHandler,dict(rules=configurations.replace_to_originalhost_rules)
         )
         ])
