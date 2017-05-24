@@ -120,14 +120,21 @@ class FileHandler(tornado.web.RequestHandler):
 
     def compute_etag(self):
         return None #disable tornado Etag
-    def initialize(self,server_static_root):
+    def initialize(self,server_static_root, main_host=None):
         logger.debug("static root dir is %s"%server_static_root)
         self.server_static_root = server_static_root
+        self.main_host=main_host
 
     @tornado.web.asynchronous
     def get(self):
         logger.debug("file handler handler request uri %s"%self.request.uri)
         self.headers = tornado.httputil.HTTPHeaders()
+        if(self.main_host is not None):  # request only get '/'
+            if(self.request.headers['Host'] == self.main_host):
+                self.request.uri += 'index.html'
+            else:
+                self.set_status(404)
+                self.write('Permission denied !')
         file_size = self.get_file_descriptor_by_uri()
         logger.debug("file size after get file descriptor: %d"%file_size)
 
@@ -430,17 +437,22 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
-    (r'/robots.txt',FileHandler,dict(server_static_root=configurations.server_static_root)
+    (r'/',FileHandler,dict(server_static_root=configurations.server_static_root,
+    main_host=configurations.main_host)
     ),
-    (r'/update',UpdateHandler,dict(selfresolve_dict=configurations.selfresolve)
+    (r'/.*\.(txt|html|png)',FileHandler,dict(server_static_root=configurations.server_static_root)
     ),
-    (r'.*', ProxyHandler,handler_initialize_dict),
+    (r'.*', HttpHandler,dict(rules=configurations.replace_to_originalhost_rules)
+    )
     ])
 
     if(configurations.https_enabled): #https_enabled
         app4redirect2https = tornado.web.Application()
         app4redirect2https.add_handlers(configurations.server_name, [
-        (r'/robots.txt',FileHandler,dict(server_static_root=configurations.server_static_root)
+        (r'/',FileHandler,dict(server_static_root=configurations.server_static_root,
+        main_host=configurations.main_host)
+        ),
+        (r'/.*\.(txt|html|png)',FileHandler,dict(server_static_root=configurations.server_static_root)
         ),
         (r'.*', HttpHandler,dict(rules=configurations.replace_to_originalhost_rules)
         )
