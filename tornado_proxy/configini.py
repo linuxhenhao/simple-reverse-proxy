@@ -7,7 +7,7 @@ import os,logging
 # host default means host(with port)
 #
 #####################################
-https_enabled = False
+https_enabled = True
 
 server_root = os.path.dirname(__file__)
 pwd = '/etc/letsencrypt/live/ipv4.thinkeryu.com/'
@@ -32,13 +32,13 @@ scihub_self = 'scihub.thinkeryu.com'
 #rules_source original host with port and proto, selfhost only host with port
 # port is optional
 rules_source = [
-('https://scholar.glgoo.org', 'scholar.thinkeryu.com'),
+('https://xues.glgoo.com', 'scholar.thinkeryu.com'),
 ('https://ipv4.google.com','ipv4.thinkeryu.com'),
 ('http://sci-hub.bz', scihub_self),
 ('https://scholar.googleusercontent.com','content.thinkeryu.com')
 ]
 
-regexs4select_filter_source = {'https?://scholar\.glgoo\..*':'filt_scholar',
+regexs4select_filter_source = {'https?://xues\.glgoo\..*':'filt_scholar',
                 'https?://ipv4\.google\..*':'filt_ipv4',
                 'https?://.*sci-hub\.bz':'filt_scihub'
                 }
@@ -56,7 +56,7 @@ filt_scholar_configs = {'scihub_host':scihub_self}
 filt_scihub_configs = {'download_html':'download.html'}
 
 util_log_level = logging.ERROR
-logger_level = logging.INFO#proxy.py's log
+logger_level = logging.INFO #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
 
