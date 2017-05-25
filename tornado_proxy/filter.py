@@ -29,10 +29,8 @@ class Myfilter:
         self._location_header_replace(response) #replace host in headers's location if exists
         util.cookie_domain_replace(direction='to_selfhost',url=url,response=response)
         content_type = self._get_content_type_from_response(response)
-        if(content_type is None):
-            return response_body
-        elif( content_type.lower().find('text/html') == -1):
-            logger.debug("content_type is %s, do nothing"% content_type)
+        if(content_type is None or content_type.lower().find('text/html') == -1):
+            logger.debug("content_type is _%s_, do nothing"% content_type)
             return response_body
         if(response.body==None or len(response.body)<=10 ):
             logger.debug("response.body is empty or none, do nothing in filter")
