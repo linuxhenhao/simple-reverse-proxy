@@ -339,6 +339,9 @@ class ProxyHandler(tornado.web.RequestHandler):
             if "X-Forward-For" in headers:
                 headers['X-Forward-For'] = headers['X-Forward-For'] + ","\
                         + self.request.remote_ip
+            else:
+                headers['X-Forward-For'] = self.request.remote_ip
+
             if "X-Real-IP" not in headers:
                 headers['X-Real-IP'] = self.request.remote_ip
 
