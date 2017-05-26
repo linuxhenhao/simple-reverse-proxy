@@ -334,6 +334,15 @@ class ProxyHandler(tornado.web.RequestHandler):
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
 
+# add x-real-ip and x-forward-for header section
+            headers = self.request.headers.copy()
+            if "X-Forward-For" in headers:
+                headers['X-Forward-For'] = headers['X-Forward-For'] + ","\
+                        + self.request.remote_ip
+            if "X-Real-IP" not in headers:
+                headers['X-Real-IP'] = self.request.remote_ip
+
+
 
 #do redirect before fetch request
 #to detect whether the request host is in redirect config rules
@@ -347,7 +356,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
-                headers=self.request.headers, follow_redirects=False,
+                headers=headers, follow_redirects=False,
                 allow_nonstandard_methods=True, allow_ipv6=True)
         except tornado.httpclient.HTTPError as e:
             if hasattr(e, 'response') and e.response:
