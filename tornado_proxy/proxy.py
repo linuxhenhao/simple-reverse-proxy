@@ -337,7 +337,7 @@ class ProxyHandler(tornado.web.RequestHandler):
 
 # add x-real-ip and x-forward-for header section
             headers = self.request.headers.copy()
-            logger.debug("Headers copyed {}".format(headers.get_all())
+            logger.debug("Headers copyed {}".format(headers.get_all()))
             if "X-Forward-For" in headers:
                 headers['X-Forward-For'] = headers['X-Forward-For'] + ","\
                         + self.request.remote_ip
