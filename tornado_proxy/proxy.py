@@ -79,6 +79,7 @@ def fetch_request(url, callback, **kwargs):
         'tornado.curl_httpclient.CurlAsyncHTTPClient')
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
+    logger.debug("fetching request's headers {}".format(req.headers))
     client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
 
 class UpdateHandler(tornado.web.RequestHandler):
