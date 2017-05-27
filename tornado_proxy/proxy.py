@@ -335,17 +335,6 @@ class ProxyHandler(tornado.web.RequestHandler):
             if 'Proxy-Connection' in self.request.headers:
                 del self.request.headers['Proxy-Connection']
 
-# add x-real-ip and x-forward-for header section
-            headers = self.request.headers.copy()
-            logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
-            if "X-Forward-For" in headers:
-                headers['X-Forward-For'] = headers['X-Forward-For'] + ","\
-                        + self.request.remote_ip
-            else:
-                headers['X-Forward-For'] = self.request.remote_ip
-
-            if "X-Real-IP" not in headers:
-                headers['X-Real-IP'] = self.request.remote_ip
 
 
 
@@ -358,6 +347,18 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.finish()
             else:
                 logger.debug("request after urlredirect %s"% self.request)
+                # add x-real-ip and x-forward-for header section
+                headers = self.request.headers.copy()
+                logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
+                if "X-Forward-For" in headers:
+                    headers['X-Forward-For'] = headers['X-Forward-For'] + ","\
+                            + self.request.remote_ip
+                else:
+                    headers['X-Forward-For'] = self.request.remote_ip
+
+                if "X-Real-IP" not in headers:
+                    headers['X-Real-IP'] = self.request.remote_ip
+                logger.debug("Headers modified{}".format([(k,v ) for k,v in headers.get_all()]))
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
