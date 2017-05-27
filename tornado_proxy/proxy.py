@@ -360,7 +360,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
                 headers=headers, follow_redirects=False,
-                allow_nonstandard_methods=True, allow_ipv6=True)
+                allow_nonstandard_methods=True, allow_ipv6=False)
         except tornado.httpclient.HTTPError as e:
             if hasattr(e, 'response') and e.response:
                 handle_response(e.response)
