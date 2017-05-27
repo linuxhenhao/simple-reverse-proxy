@@ -351,8 +351,13 @@ class ProxyHandler(tornado.web.RequestHandler):
                 headers = self.request.headers.copy()
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if "X-Forward-For" in headers:
-                    headers['X-Forward-For'] = headers['X-Forward-For'] + ","\
-                            + self.request.remote_ip
+                    ip_list = headers.get_list('X-Forward-For')
+                    # only one, containning the host ip
+                    del headers['X-Forward-For']
+                    ip_list.insert(-1, self.request.remote_ip)
+                    headers['X-Forward-For'] = ip_list[0]
+                    for ip in ip_list[1:]:
+                        headers.add('X-Forward-For', ip)
                 else:
                     headers['X-Forward-For'] = self.request.remote_ip
 
