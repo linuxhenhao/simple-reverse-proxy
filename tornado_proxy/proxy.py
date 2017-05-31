@@ -365,7 +365,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                     headers['X-Real-IP'] = self.request.remote_ip
                 logger.debug("Headers modified{}".format([(k,v ) for k,v in headers.get_all()]))
                 ipv6 = True
-                if(self.request.host == 'scihub.thinkeryu.com'):
+                if(not self.request.host.find('sci-hub') < 0):
                     ipv6 = False
                 fetch_request(
                 self.request.uri, handle_response,
