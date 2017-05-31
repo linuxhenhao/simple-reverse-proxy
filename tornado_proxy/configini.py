@@ -47,7 +47,7 @@ regexs4select_filter_source = {'https?://scholar\.google\..*':'filt_scholar',
 # {'host_name':ip_addrs_list}
 # if there is more than one item in ip_addrs_list
 # get one of the in random
-selfresolve = {'sci-hub.bz',[80.82.77.83]}  # replace scholar.google.com to google server's ip address in request uri directly
+selfresolve = {'sci-hub.bz':[80.82.77.83]}  # replace scholar.google.com to google server's ip address in request uri directly
 				  # and set host to "scholar.google.com " in request headers doesn't work
 				  # So, google may has some request uri judge, We can only use self hosted dns server
 				  # to return google's server address randomly , and maintain a list of google's server
