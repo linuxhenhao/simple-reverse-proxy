@@ -364,11 +364,14 @@ class ProxyHandler(tornado.web.RequestHandler):
                 if "X-Real-IP" not in headers:
                     headers['X-Real-IP'] = self.request.remote_ip
                 logger.debug("Headers modified{}".format([(k,v ) for k,v in headers.get_all()]))
+                ipv6 = True
+                if(self.request.host == 'scihub.thinkeryu.com'):
+                    ipv6 = False
                 fetch_request(
                 self.request.uri, handle_response,
                 method=self.request.method, body=body,
                 headers=headers, follow_redirects=False,
-                allow_nonstandard_methods=True, allow_ipv6=True)
+                allow_nonstandard_methods=True, allow_ipv6=ipv6)
         except tornado.httpclient.HTTPError as e:
             if hasattr(e, 'response') and e.response:
                 handle_response(e.response)
