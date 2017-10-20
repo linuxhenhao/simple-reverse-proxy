@@ -19,7 +19,7 @@ class getHostError(Exception):
 
 class configurations:
     def __init__(self,https_enabled, fullchain_cert_path, private_key_path,\
-            server_name,main_host,server_static_root,rules_source,regexs,selfresolve,**kwargs):
+            server_name,main_host,server_static_root,rules_source,regexs,allow_ipv6,selfresolve,**kwargs):
         self._https_enabled = https_enabled
         if(https_enabled):
             self._selfhost_proto = 'https'
@@ -33,14 +33,20 @@ class configurations:
         self._rules_source = rules_source
         self._regexs4select_filter_source = regexs
         self._selfresolve = selfresolve
+        self._allow_ipv6 = allow_ipv6
         self._gen_regexs4select_filter()
         self._gen_replace_rules() #generate two dict from rules_source
                                   #add to self.replace_to_xxx
         self._gen_configs_for_filters(**kwargs)
+
     @property
     def https_enabled(self):
         copy = self._https_enabled
         return copy
+
+    @property
+    def allow_ipv6(self):
+        return self._allow_ipv6
 
     @property
     def fullchain_cert_path(self):
@@ -120,5 +126,7 @@ class configurations:
             if(kwargs.has_key(filter_name+'_configs')):
                 setattr(self, "_"+filter_name, kwargs[filter_name+'_configs'])
 
-all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path,server_name, main_host, server_static_root,rules_source,regexs4select_filter_source,selfresolve, \
+all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path, \
+        server_name, main_host, server_static_root,rules_source, \
+        regexs4select_filter_source, allow_ipv6, selfresolve, \
                 filt_scholar_configs=filt_scholar_configs,filt_scihub_configs=filt_scihub_configs)

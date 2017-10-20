@@ -228,6 +228,7 @@ class ProxyHandler(tornado.web.RequestHandler):
         ProxyHandler._replace_to_originalhost_rules = kwargs['rules']
         ProxyHandler._selfresolve = kwargs['selfresolve']
         ProxyHandler._https_enabled = kwargs['https_enabled']
+        ProxyHandler._allow_ipv6 = kwargs['allow_ipv6']
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -456,7 +457,8 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     myfilter=filter.Myfilter(configurations,workdir)
     handler_initialize_dict = dict(rules=configurations.replace_to_originalhost_rules,\
                          selfresolve=configurations.selfresolve, Myfilter=myfilter,\
-                         https_enabled=configurations.https_enabled
+                         https_enabled=configurations.https_enabled,
+                         allow_ipv6=configurations.allow_ipv6
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
