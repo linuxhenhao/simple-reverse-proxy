@@ -311,7 +311,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 self.url_before_selfresolve = self.request.uri
                 host_without_port = self.request.host.split(":")[0]
                 logger.debug("host without port is {}".format(host_without_port))
-                logger.debug("selfresolve dict {}".format(str(self._selfresolve))
+                logger.debug("selfresolve dict {}".format(str(self._selfresolve)))
                 if(host_without_port in ProxyHandler._selfresolve): # request host in selfresolve dict
                     ip_addrs = self._selfresolve[host_without_port]
                     #if ip_addrs has multiple values, random get one ip to fetch content
