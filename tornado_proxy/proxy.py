@@ -35,7 +35,8 @@ if sys.version_info[0] < 3:  # in python 2
     from urlparse import urlparse
 else:
     from urllib.parse import urlparse
-import filter,re
+import filter
+import re
 import util,config
 import cloudflareDetect
 import json
@@ -358,8 +359,9 @@ class ProxyHandler(tornado.web.RequestHandler):
                 # Everytime we fetch content for a request comes from cloudflare cdn,
                 # this option is set. Then, if we carry this option in headers to fetch
                 # data on cloudflare cdn again, cloudflare throws a Error 1000.
-                if 'Cf-Ray' in headers:
-                    del headers['Cf-Ray']
+                for k, v in  headers:
+                    if('Cf-' in k):
+                        del headers[k]
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
                     # to avoid the cloudflare's cyclic check problem, if our site is cached by
