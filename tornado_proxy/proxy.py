@@ -359,8 +359,9 @@ class ProxyHandler(tornado.web.RequestHandler):
                 # Everytime we fetch content for a request comes from cloudflare cdn,
                 # this option is set. Then, if we carry this option in headers to fetch
                 # data on cloudflare cdn again, cloudflare throws a Error 1000.
-                for k, v in  headers:
-                    if('Cf-' in k):
+                for header_name in  headers:  # only iter keys, without value
+                    # beacuse the headers is a collection.mutableMaping
+                    if('Cf-' in header_name):
                         del headers[k]
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
