@@ -41,7 +41,7 @@ rules_source = [
 
 regexs4select_filter_source = {'https?://scholar\.google\..*':'filt_scholar',
                 'https?://ipv4\.google\..*':'filt_ipv4',
-                'https?://.*sci-hub\.bz':'filt_scihub'
+                'https?://.*sci-hub\.io':'filt_scihub'
                 }
 
 # allow_ipv6 option determines whethe to use ipv6 to resolve url in client.fetch
