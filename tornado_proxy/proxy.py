@@ -535,5 +535,7 @@ if __name__ == '__main__':
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
     cf_detecter = cloudflareDetect.DetectThread(cf_urls)
+    cf_detecter.setDaemon(True)  # setDaemon to make this entire process closed when
+                                 # terminated by key board
     cf_detecter.start()
     run_proxy(port,ip,pwd,configurations, cf_detecter)

@@ -45,7 +45,7 @@ regexs4select_filter_source = {'https?://scholar\.google\..*':'filt_scholar',
                 }
 
 # allow_ipv6 option determines whethe to use ipv6 to resolve url in client.fetch
-allow_ipv6 = False
+allow_ipv6 = True
 # selfresolve format
 # {'host_name':ip_addrs_list}
 # if there is more than one item in ip_addrs_list
