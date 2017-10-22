@@ -208,11 +208,15 @@ Finis.
 # Import our required modules
 #
 import string
+import sys
 
 try:
     from cPickle import dumps, loads
 except ImportError:
     from pickle import dumps, loads
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 import re, warnings
 

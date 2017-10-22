@@ -31,9 +31,13 @@ import sys
 import socket
 import ssl,random
 
-from urlparse import urlparse
+if sys.version_info[0] < 3:  # in python 2
+    from urlparse import urlparse
+else:
+    from urllib.parse import urlparse
 import filter,re
 import util,config
+import cloudflareDetect
 import json
 
 try:
@@ -229,6 +233,9 @@ class ProxyHandler(tornado.web.RequestHandler):
         ProxyHandler._selfresolve = kwargs['selfresolve']
         ProxyHandler._https_enabled = kwargs['https_enabled']
         ProxyHandler._allow_ipv6 = kwargs['allow_ipv6']
+        # cloudflare ips maintainer, used to determin whether adding remote_ip
+        # to X-Forward-For and X-Real-IP or not
+        ProxyHandler._cf_detecter = kwargs['cf_detecter']
 
     def compute_etag(self):
         return None # disable tornado Etag
@@ -353,19 +360,27 @@ class ProxyHandler(tornado.web.RequestHandler):
                 # add x-real-ip and x-forward-for header section
                 headers = self.request.headers.copy()
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
-                if "X-Forward-For" in headers:
-                    ip_list = headers.get_list('X-Forward-For')
-                    # only one, containning the host ip
-                    del headers['X-Forward-For']
-                    ip_list.insert(-1, self.request.remote_ip)
-                    headers['X-Forward-For'] = ip_list[0]
-                    for ip in ip_list[1:]:
-                        headers.add('X-Forward-For', ip)
-                else:
-                    headers['X-Forward-For'] = self.request.remote_ip
+                if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
+                    # to avoid the cloudflare's cyclic check problem, if our site is cached by
+                    # cloudflare, the request from user client will be sent from cloudflare's point
+                    # we should not add this ip in request.remote_ip the X-Forward-For and X-Real-IP
+                    # section. otherwise, when our own server try to fetch content from some websites who's
+                    # content is also cached by cloudflare, a cyclic error will throw by cloudflare, which
+                    # block us from the content we want to pull.
+                    if "X-Forward-For" in headers:
+                        ip_list = headers.get_list('X-Forward-For')
+                        # only one, containning the host ip
+                        del headers['X-Forward-For']
+                        ip_list.insert(-1, self.request.remote_ip)
+                        headers['X-Forward-For'] = ip_list[0]
+                        for ip in ip_list[1:]:
+                            headers.add('X-Forward-For', ip)
+                    else:
+                        headers['X-Forward-For'] = self.request.remote_ip
 
-                if "X-Real-IP" not in headers:
-                    headers['X-Real-IP'] = self.request.remote_ip
+                    if "X-Real-IP" not in headers:
+                        headers['X-Real-IP'] = self.request.remote_ip
+                ### in cloudflare's ip list, do not add
                 logger.debug("Headers modified{}".format([(k,v ) for k,v in headers.get_all()]))
                 fetch_request(
                 self.request.uri, handle_response,
@@ -449,7 +464,7 @@ class ProxyHandler(tornado.web.RequestHandler):
             upstream.connect((host, int(port)), start_tunnel)
 
 
-def run_proxy(port, address, workdir, configurations, start_ioloop=True):
+def run_proxy(port, address, workdir, configurations, cf_detecter, start_ioloop=True):
     """
     Run proxy on the specified port. If start_ioloop is True (default),
     the tornado IOLoop will be started immediately.
@@ -460,7 +475,8 @@ def run_proxy(port, address, workdir, configurations, start_ioloop=True):
     handler_initialize_dict = dict(rules=configurations.replace_to_originalhost_rules,\
                          selfresolve=configurations.selfresolve, Myfilter=myfilter,\
                          https_enabled=configurations.https_enabled,
-                         allow_ipv6=configurations.allow_ipv6
+                         allow_ipv6=configurations.allow_ipv6,
+                         cf_detecter=cf_detecter
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
@@ -517,4 +533,6 @@ if __name__ == '__main__':
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
-    run_proxy(port,ip,pwd,configurations)
+    cf_detecter = cloudflareDetect.DetectThread(['https://www.cloudflare.com/ips-v4', 'https://www.cloudflare.com/ips-v4'])
+    cf_detecter.start()
+    run_proxy(port,ip,pwd,configurations, cf_detecter)

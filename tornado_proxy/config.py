@@ -123,7 +123,7 @@ class configurations:
     def _gen_configs_for_filters(self,**kwargs):
         '''get configs for every filter in regexs4select_filter dict'''
         for filter_name in self._regexs4select_filter.values():
-            if(kwargs.has_key(filter_name+'_configs')):
+            if(filter_name+'_configs' in kwargs):
                 setattr(self, "_"+filter_name, kwargs[filter_name+'_configs'])
 
 all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path, \

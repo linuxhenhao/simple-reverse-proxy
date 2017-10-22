@@ -2,7 +2,12 @@
 #-*- coding: utf-8 -*-
 
 #general useful functions for this project
-import MyCookie as Cookie
+import sys
+if sys.version_info[0] < 3:
+    # python 2
+    import MyCookie as Cookie
+else:
+    from http import cookies as Cookie
 
 from configini import rules_source,util_log_level
 import logging
@@ -26,7 +31,6 @@ class HostNotFoundError(Exception):
         self.url=url
     def __str__(self):
         return repr('cannot found host in '+self.url)
-
 
 def replace_to_selfhost(origin_url,to_selfhost_rules):
     '''replace the original url to our server's url
