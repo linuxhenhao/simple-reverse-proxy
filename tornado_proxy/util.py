@@ -3,11 +3,8 @@
 
 #general useful functions for this project
 import sys
-if sys.version_info[0] < 3:
-    # python 2
-    import MyCookie as Cookie
-else:
-    from http import cookies as Cookie
+import mycookie as Cookie  # import modifiled cookie module
+                # to avoid illegal key erro
 
 from configini import rules_source,util_log_level
 import logging
