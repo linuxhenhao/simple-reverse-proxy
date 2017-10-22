@@ -49,8 +49,8 @@ class DetectThread(threading.Thread):
             #    pass
 
     def run(self):
-        self.updateList()
         time.sleep(3600)
+        self.updateList()
 
     def isInIPList(self, ipaddr):
         return self.iplistM.isInIPList(ipaddr)
