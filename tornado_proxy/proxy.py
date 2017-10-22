@@ -83,7 +83,7 @@ def fetch_request(url, callback, **kwargs):
         'tornado.curl_httpclient.CurlAsyncHTTPClient')
     req = tornado.httpclient.HTTPRequest(url, **kwargs)
     client = tornado.httpclient.AsyncHTTPClient()
-    logger.debug("fetching request's headers {}".format(req.headers))
+    logger.debug("fetching request's headers {}".format([tup for tup in req.headers.get_all()]))
     client.fetch(req, callback, raise_error=True) #raise HTTPError for further treatment
 
 class UpdateHandler(tornado.web.RequestHandler):
@@ -330,13 +330,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                 return True #if program runs to selfresolve step, always return True,url redirect finishied
 
             return False
-
-
-
             #    print ">>redirect from "+host+" to "+to_host
-
-
-
 
         body = self.request.body
         if not body:
@@ -359,6 +353,13 @@ class ProxyHandler(tornado.web.RequestHandler):
                 logger.debug("request after urlredirect %s"% self.request)
                 # add x-real-ip and x-forward-for header section
                 headers = self.request.headers.copy()
+                # delete the cf-ray option in headers, cloudflare use this option
+                # to avoid loop proxy.
+                # Everytime we fetch content for a request comes from cloudflare cdn,
+                # this option is set. Then, if we carry this option in headers to fetch
+                # data on cloudflare cdn again, cloudflare throws a Error 1000.
+                if 'Cf-Ray' in headers:
+                    del headers['Cf-Ray']
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
                     # to avoid the cloudflare's cyclic check problem, if our site is cached by
