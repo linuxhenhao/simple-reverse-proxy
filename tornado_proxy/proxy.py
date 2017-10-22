@@ -521,6 +521,7 @@ if __name__ == '__main__':
     tornado.web.access_log.setLevel(access_log_level)
     pwd = os.path.dirname(os.path.realpath(__file__))+'/'
     configurations = config.all_configuration #get all configrations in config.py
+    cf_urls = config.cf_urls  # cloudflare's ip list contente web urls
     if(os.getenv('OPENSHIFT_PYTHON_IP')==None):
         ip='0.0.0.0'
         if(configurations.https_enabled):
@@ -533,6 +534,6 @@ if __name__ == '__main__':
         port = int(os.getenv('OPENSHIFT_PYTHON_PORT'))
         ip = os.getenv('OPENSHIFT_PYTHON_IP')
     print ("Starting HTTP proxy on %s port %d" % (ip,port))
-    cf_detecter = cloudflareDetect.DetectThread(['https://www.cloudflare.com/ips-v4', 'https://www.cloudflare.com/ips-v4'])
+    cf_detecter = cloudflareDetect.DetectThread(cf_urls)
     cf_detecter.start()
     run_proxy(port,ip,pwd,configurations, cf_detecter)

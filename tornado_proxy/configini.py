@@ -65,6 +65,9 @@ logger_level = logging.INFO #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
 
+#### cloudflare ip list Detecter configs
+cf_urls = ['https://www.cloudflare.com/ips-v4',
+           'https://www.cloudflare.com/ips-v6']
 
 #--------------------------------------------------------------------------
 class DNSServerSettings:
