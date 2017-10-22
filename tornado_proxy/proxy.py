@@ -287,7 +287,10 @@ class ProxyHandler(tornado.web.RequestHandler):
 
                 if response_body:
                     logger.debug('>>>before write response body')
-                    self.set_header('Content-Length', len(response_body))
+                    ### self.set_header('Content-Length', len(response_body))
+                    # tornado will set content-length automaticly, so we should
+                    # not set it by hand, this will cause length do not identical
+                    # error in python3
                     self.write(response_body)
             self.finish()
 
