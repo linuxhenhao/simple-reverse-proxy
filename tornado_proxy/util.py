@@ -3,8 +3,15 @@
 
 #general useful functions for this project
 import sys
-import mycookies as Cookie  # import modifiled cookie module
-                # to avoid illegal key erro
+if sys.version_info[0] == 2:
+    # python2.x
+    import Cookie
+elif sys.version_info[0] == 3:
+    from http import cookies as Cookie
+
+Cookie._LegalChars += ','
+    # after import modify the legalChars in cookie module
+    # to avoid illegal key erro
 
 from configini import rules_source,util_log_level
 import logging
