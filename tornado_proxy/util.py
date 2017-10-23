@@ -10,8 +10,10 @@ elif sys.version_info[0] == 3:
     from http import cookies as Cookie
 
 Cookie._LegalChars += ','
-    # after import modify the legalChars in cookie module
-    # to avoid illegal key erro
+
+Cookie._is_legal_key = re.compile('^[%s]+$' % re.escape(_LegalChars)).match
+# after import modify the legalChars in cookie module
+# to avoid illegal key erro
 
 from configini import rules_source,util_log_level
 import logging
