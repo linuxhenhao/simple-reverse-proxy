@@ -3,6 +3,7 @@
 
 #general useful functions for this project
 import sys
+import re
 if sys.version_info[0] == 2:
     # python2.x
     import Cookie
