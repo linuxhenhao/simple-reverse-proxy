@@ -12,7 +12,7 @@ elif sys.version_info[0] == 3:
 
 Cookie._LegalChars += ','
 
-Cookie._is_legal_key = re.compile('^[%s]+$' % re.escape(_LegalChars)).match
+Cookie._is_legal_key = re.compile('^[%s]+$' % re.escape(Cookie._LegalChars)).match
 # after import modify the legalChars in cookie module
 # to avoid illegal key erro
 
