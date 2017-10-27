@@ -448,10 +448,9 @@ def run_proxy(port, address, workdir, configurations, cf_detecter, start_ioloop=
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
-    (r'/.*\.(txt|html|png)',FileHandler,dict(path=configurations.server_static_root)
-    ),
-    (r'/$',FileHandler,dict(path=configurations.server_static_root,
-    main_host=configurations.main_host)
+    (r'/(robots\.txt|index\.html|[^/]*\.png)', tornado.web.StaticFileHandler,
+        dict(path=configurations.server_static_root,
+        default_filename='index.html')
     ),
     (r'.*', ProxyHandler,handler_initialize_dict
     )
