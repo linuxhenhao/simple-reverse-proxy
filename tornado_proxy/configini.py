@@ -10,7 +10,7 @@ import os,logging
 https_enabled = True
 
 server_root = os.path.dirname(__file__)
-pwd = '/etc/letsencrypt/live/ipv4.thinkeryu.com/'
+pwd = '/etc/tornadoproxy/'
 if(os.path.exists('/etc/INDOCKER')): #in an docker container
     pwd = '/media/live/ipv4.thinkeryu.com/'
     fullchain_cert_path = pwd+'fullchain.pem'

@@ -151,7 +151,7 @@ class FileHandler(tornado.web.RequestHandler):
             self.set_status(200)
             self.set_header('Content-Length', file_size)
             while True:
-                response_body = self.file_descriptor.read(1048576)
+                response_body = self.file_descriptor.read()
                 # 1024*1024 1M byte every time
                 if(response_body != ''):
                     self.write(response_body)
@@ -179,7 +179,7 @@ class FileHandler(tornado.web.RequestHandler):
             file_location = self.server_static_root + self.request.uri
             logger.debug("file_location is %s"%file_location)
         if(os.path.exists(file_location)): #file exists
-            self.file_descriptor = open(file_location)
+            self.file_descriptor = open(file_location, encoding='utf-8')
             return os.path.getsize(file_location)
         else:
             return 0
