@@ -138,12 +138,12 @@ class FileHandler(tornado.web.StaticFileHandler):
         self.headers = tornado.httputil.HTTPHeaders()
         if(self.main_host is not None):  # request only get '/'
             if(self.request.headers['Host'] == self.main_host):
-                super(self, FileHandler).get('index.html')
+                super(FileHandler, self).get('index.html')
             else:
                 self.set_status(404)
                 self.write(b'Permission denied !')
         else:
-            super(self, FileHandler).get(path)
+            super(FileHandler, self).get(path)
 
 
 class HttpHandler(tornado.web.RequestHandler):
