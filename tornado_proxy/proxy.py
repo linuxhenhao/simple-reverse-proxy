@@ -121,71 +121,29 @@ class UpdateHandler(tornado.web.RequestHandler):
         self.write(response)
         self.finish()
 
-class FileHandler(tornado.web.RequestHandler):
+class FileHandler(tornado.web.StaticFileHandler):
     SUPPORTED_METHODS = ['GET']
 
     def compute_etag(self):
         return None #disable tornado Etag
-    def initialize(self,server_static_root, main_host=None):
-        logger.debug("static root dir is %s"%server_static_root)
-        self.server_static_root = server_static_root
-        self.main_host=main_host
+
+    def initialize(self, path, main_host=None):
+        logger.debug("static root dir is %s"%path)
+        super(self, FileHandler).initialize(path=path)
+        self.main_host = main_host
         logger.debug("main host is {}".format(self.main_host))
 
-    @tornado.web.asynchronous
-    def get(self, filename=None):
+    def get(self, path=None):
         logger.debug("FileHandler handle request uri %s"%self.request.uri)
         self.headers = tornado.httputil.HTTPHeaders()
         if(self.main_host is not None):  # request only get '/'
             if(self.request.headers['Host'] == self.main_host):
-                self.request.uri += 'index.html'
+                super(self, FileHandler).get('index.html')
             else:
                 self.set_status(404)
-                self.write('Permission denied !')
-                self.finish()
-                return
-        file_size = self.get_file_descriptor_by_uri()
-        logger.debug("file size after get file descriptor: %d"%file_size)
-
-        if( file_size != 0): # True if get file descriptor success
-            self.set_status(200)
-            self.set_header('Content-Length', file_size)
-            while True:
-                response_body = self.file_descriptor.read()
-                # 1024*1024 1M byte every time
-                if(response_body != ''):
-                    self.write(response_body)
-                else: # no left content to send
-                    self.file_descriptor.close()
-                    break
+                self.write(b'Permission denied !')
         else:
-            self.set_status(404)
-            self.write('File Not Found!')
-
-        self.finish()
-
-    def get_file_descriptor_by_uri(self):
-        # add self.file_descriptor and return file size,zero if file not found
-        #url is in '/xxx.xxx/xxx/' or https?://xxx.xxx/xxx format
-        #check url format to cut host and https? part first
-        host_pattern=re.compile("(https?://[^/]+)")
-        match_result=host_pattern.match(self.request.uri)
-        logger.debug("get file descriptor from uri %s"%self.request.uri)
-        if(match_result!=None): #has host info in uri, 'https?://xxx/xxx' format
-            file_location = self.server_static_root  + self.request.uri[match_result.end:]
-            logger.debug("requested file is %s"%file_location)
-        else:
-            logger.debug("uri is %s,no re match"%self.request.uri)
-            file_location = self.server_static_root + self.request.uri
-            logger.debug("file_location is %s"%file_location)
-        if(os.path.exists(file_location)): #file exists
-            self.file_descriptor = open(file_location, encoding='utf-8')
-            return os.path.getsize(file_location)
-        else:
-            return 0
-
-
-
+            super(self, FileHandler).get(path)
 
 
 class HttpHandler(tornado.web.RequestHandler):
@@ -490,9 +448,9 @@ def run_proxy(port, address, workdir, configurations, cf_detecter, start_ioloop=
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
-    (r'/.*\.(txt|html|png)',FileHandler,dict(server_static_root=configurations.server_static_root)
+    (r'/.*\.(txt|html|png)',FileHandler,dict(path=configurations.server_static_root)
     ),
-    (r'/',FileHandler,dict(server_static_root=configurations.server_static_root,
+    (r'/$',FileHandler,dict(path=configurations.server_static_root,
     main_host=configurations.main_host)
     ),
     (r'.*', ProxyHandler,handler_initialize_dict
