@@ -129,7 +129,7 @@ class FileHandler(tornado.web.StaticFileHandler):
 
     def initialize(self, path, main_host=None):
         logger.debug("static root dir is %s"%path)
-        super(self, FileHandler).initialize(path=path)
+        super(FileHandler, self).initialize(path=path)
         self.main_host = main_host
         logger.debug("main host is {}".format(self.main_host))
 
