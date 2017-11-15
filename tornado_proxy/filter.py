@@ -144,8 +144,10 @@ class Myfilter:
         if(len(save)==0): #not in download page
             return
 #There is in download page
-        new_download_html=open(self._workdir+filt_configs['download_html']).read()
-        new_download_soup=BeautifulSoup(new_download_html,'html.parser')
+        if(hasattr(self, 'download_html') is False):
+            self.download_html=open(self._workdir+filt_configs['download_html'],
+                    encoding="utf-8").read()
+        new_download_soup=BeautifulSoup(self.download_html,'html.parser')
 
         new_download_soup.iframe['src']=soup.iframe['src']
 
