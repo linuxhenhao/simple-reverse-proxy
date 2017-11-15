@@ -320,15 +320,13 @@ class ProxyHandler(tornado.web.RequestHandler):
                 # Everytime we fetch content for a request comes from cloudflare cdn,
                 # this option is set. Then, if we carry this option in headers to fetch
                 # data on cloudflare cdn again, cloudflare throws a Error 1000.
-                del_list = list()
                 for header_name in  headers:  # only iter keys, without value
                     # beacuse the headers is a collection.mutableMaping
                     if('Cf-' in header_name):
-                        del_list.append(header_name)
-                for k in del_list:
-                    del headers[k]
+                        del headers[header_name]
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
+                    log.info('IP {} no in cloudflare\'s list'.format(self.request.remote_ip))
                     # to avoid the cloudflare's cyclic check problem, if our site is cached by
                     # cloudflare, the request from user client will be sent from cloudflare's point
                     # we should not add this ip in request.remote_ip the X-Forward-For and X-Real-IP
@@ -448,7 +446,7 @@ def run_proxy(port, address, workdir, configurations, cf_detecter, start_ioloop=
                          )
     app = tornado.web.Application()
     app.add_handlers(configurations.server_name, [
-    (r'/(robots\.txt|index\.html|[^/]*\.png)', tornado.web.StaticFileHandler,
+    (r'/(robots\.txt|index\.html|[^/]*\.png|$)', tornado.web.StaticFileHandler,
         dict(path=configurations.server_static_root,
         default_filename='index.html')
     ),
