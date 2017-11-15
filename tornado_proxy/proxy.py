@@ -326,7 +326,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                     if('Cf-' in header_name):
                         # can not change headers in 'for xx in headers loop'
                         del_list.append(header_name)
-                for k in del_list:
+                for header_name in del_list:
                     del headers[header_name]
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
