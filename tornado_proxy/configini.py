@@ -35,7 +35,7 @@ rules_source = [
 ('https://scholar.google.com', 'scholar.thinkeryu.com'),
 ('https://ipv4.google.com','ipv4.thinkeryu.com'),
 ('https://ipv6.google.com','ipv6.thinkeryu.com'),
-('https://sci-hub.io', scihub_self),
+('https://sci-hub.bz', scihub_self),
 ('https://scholar.googleusercontent.com','content.thinkeryu.com')
 ]
 
