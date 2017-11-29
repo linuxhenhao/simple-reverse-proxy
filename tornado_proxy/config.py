@@ -19,7 +19,9 @@ class getHostError(Exception):
 
 class configurations:
     def __init__(self,https_enabled, fullchain_cert_path, private_key_path,\
-            server_name,main_host,server_static_root,rules_source,regexs,allow_ipv6,selfresolve,**kwargs):
+            server_name,main_host,server_static_root,rules_source,regexs,allow_ipv6,selfresolve ,\
+            data_sitekey,
+            **kwargs):
         self._https_enabled = https_enabled
         if(https_enabled):
             self._selfhost_proto = 'https'
@@ -33,6 +35,10 @@ class configurations:
         self._rules_source = rules_source
         self._regexs4select_filter_source = regexs
         self._selfresolve = selfresolve
+
+        # google recaptcha sitekey for scholar mirror host
+        self._data_sitekey = data_sitekey
+
         self._allow_ipv6 = allow_ipv6
         self._gen_regexs4select_filter()
         self._gen_replace_rules() #generate two dict from rules_source
@@ -43,6 +49,10 @@ class configurations:
     def https_enabled(self):
         copy = self._https_enabled
         return copy
+
+    @property
+    def data_sitekey(self):
+        return self._data_sitekey
 
     @property
     def allow_ipv6(self):
@@ -81,6 +91,7 @@ class configurations:
     def server_static_root(self):
         copy = self._server_static_root
         return copy
+
     @property
     def regexs4select_filter(self):
         return self._regexs4select_filter.copy()
@@ -129,4 +140,5 @@ class configurations:
 all_configuration = configurations(https_enabled,fullchain_cert_path,private_key_path, \
         server_name, main_host, server_static_root,rules_source, \
         regexs4select_filter_source, allow_ipv6, selfresolve, \
-                filt_scholar_configs=filt_scholar_configs,filt_scihub_configs=filt_scihub_configs)
+                filt_scholar_configs=filt_scholar_configs,filt_scihub_configs=filt_scihub_configs,\
+                data_sitekey=data_sitekey)
