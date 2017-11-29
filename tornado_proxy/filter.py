@@ -91,12 +91,16 @@ class Myfilter:
     def filt_ipv46(self,response,soup,filt_configs=None,**kwards): #url replace for ipv4.google.com
             if(response.body==None or len(response.body)<10):
                 return
-            soup.find('div', attrs={'id': 'recaptcha'})['data-sitekey'] \
-                    = self._configurations.data_sitekey
+            data_sitekey_div = soup.find('div', attrs={'id': 'recaptcha'})
+            if(data_sitekey_div is not None and \
+                    'data-sitekey' in data_sitekey_div.attrs):
+                data_sitekey_div['data-sitekey'] = \
+                        self._configurations.data_sitekey
             continue_input = soup.find('input', attrs={'name': 'continue'})
-            continue_input['value'] = util.replace_to_selfhost(continue_input['value'], \
-                    self._replace_to_selfhost_rules)
-
+            if(continue_input is not None and 'value' in continue_input.attrs):
+                continue_input['value'] = util.replace_to_selfhost(
+                        continue_input['value'],
+                        self._replace_to_selfhost_rules)
 
             return str(soup)
 
