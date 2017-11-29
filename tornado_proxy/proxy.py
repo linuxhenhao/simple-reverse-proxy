@@ -330,7 +330,7 @@ class ProxyHandler(tornado.web.RequestHandler):
                     del headers[header_name]
                 logger.debug("Headers copyed {}".format([(k,v ) for k,v in headers.get_all()]))
                 if(ProxyHandler._cf_detecter.isInIPList(self.request.remote_ip) is False):
-                    log.info('IP {} no in cloudflare\'s list'.format(self.request.remote_ip))
+                    logger.info('IP {} not in cloudflare\'s list'.format(self.request.remote_ip))
                     # to avoid the cloudflare's cyclic check problem, if our site is cached by
                     # cloudflare, the request from user client will be sent from cloudflare's point
                     # we should not add this ip in request.remote_ip the X-Forward-For and X-Real-IP
