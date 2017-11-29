@@ -32,15 +32,15 @@ scihub_self = 'scihub.thinkeryu.com'
 #rules_source original host with port and proto, selfhost only host with port
 # port is optional
 rules_source = [
-('https://scholar.google.com', 'scholar.thinkeryu.com'),
+('https://xues.glgoo.com', 'scholar.thinkeryu.com'),
 ('https://ipv4.google.com','ipv4.thinkeryu.com'),
 ('https://ipv6.google.com','ipv6.thinkeryu.com'),
 ('https://sci-hub.bz', scihub_self),
 ('https://scholar.googleusercontent.com','content.thinkeryu.com')
 ]
 
-regexs4select_filter_source = {'https?://scholar\.google\..*':'filt_scholar',
-                'https?://ipv4\.google\..*':'filt_ipv4',
+regexs4select_filter_source = {'https?://xues\.glgoo\..*':'filt_scholar',
+                'https?://ipv(4|6)\.google\..*':'filt_ipv46',
                 'https?://.*sci-hub\.bz':'filt_scihub'
                 }
 

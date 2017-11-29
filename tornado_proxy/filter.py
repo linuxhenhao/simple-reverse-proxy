@@ -88,7 +88,7 @@ class Myfilter:
             return replaced
 
 
-    def filt_ipv4(self,response,soup,filt_configs=None,**kwards): #url replace for ipv4.google.com
+    def filt_ipv46(self,response,soup,filt_configs=None,**kwards): #url replace for ipv4.google.com
             if(response.body==None or len(response.body)<10):
                 return
 
