@@ -324,7 +324,10 @@ class ProxyHandler(tornado.web.RequestHandler):
                 for header_name in  headers:  # only iter keys, without value
                     # beacuse the headers is a collection.mutableMaping
                     if('Cf-' in header_name):
-                        # can not change headers in 'for xx in headers loop'
+                        del_list.append(header_name)
+                    if('__cfduid' in header_name):
+                        del_list.append(header_name)
+                    if('_ym_uid' in header_name):
                         del_list.append(header_name)
                 for header_name in del_list:
                     del headers[header_name]
