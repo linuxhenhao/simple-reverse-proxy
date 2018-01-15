@@ -52,7 +52,7 @@ allow_ipv6 = True
 # {'host_name':ip_addrs_list}
 # if there is more than one item in ip_addrs_list
 # get one of the in random
-selfresolve = {}
+selfresolve = {'xue.glgoo.net': [172.104.74.82]}
 # replace scholar.google.com to google server's
 # ip address in request uri directly
 # and set host to "scholar.google.com " in request headers doesn't work
