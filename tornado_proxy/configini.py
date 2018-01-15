@@ -32,36 +32,41 @@ scihub_self = 'scihub.thinkeryu.com'
 #rules_source original host with port and proto, selfhost only host with port
 # port is optional
 rules_source = [
-('https://g.nuist.top', 'scholar.thinkeryu.com'),
+('https://xue.glgoo.net', 'scholar.thinkeryu.com'),
 ('https://ipv4.google.com','ipv4.thinkeryu.com'),
 ('https://ipv6.google.com','ipv6.thinkeryu.com'),
-('https://sci-hub.bz', scihub_self),
+('https://sci-hub.tw', scihub_self),
 ('https://scholar.googleusercontent.com','content.thinkeryu.com')
 ]
 
-regexs4select_filter_source = {'https?://g\.nuist\..*':'filt_scholar',
-                'https?://ipv(4|6)\.google\..*':'filt_ipv46',
-                'https?://.*sci-hub\.bz':'filt_scihub'
+regexs4select_filter_source = {
+        'https?://xue\.glgoo\..*': 'filt_scholar',
+        'https?://ipv(4|6)\.google\..*': 'filt_ipv46',
+        'https?://.*sci-hub\.tw': 'filt_scihub'
                 }
-data_sitekey='6LfWzToUAAAAAAkKGSrsoG9DcFn_Z_f1cN5d9_Zk'
-# allow_ipv6 option determines whethe to use ipv6 to resolve url in client.fetch
+data_sitekey ='6LfWzToUAAAAAAkKGSrsoG9DcFn_Z_f1cN5d9_Zk'
+# allow_ipv6 option determines whethe to use ipv6 to
+# resolve url in client.fetch
 allow_ipv6 = True
 # selfresolve format
 # {'host_name':ip_addrs_list}
 # if there is more than one item in ip_addrs_list
 # get one of the in random
 selfresolve = {}
-# replace scholar.google.com to google server's ip address in request uri directly
+# replace scholar.google.com to google server's
+# ip address in request uri directly
 # and set host to "scholar.google.com " in request headers doesn't work
-# So, google may has some request uri judge, We can only use self hosted dns server
-# to return google's server address randomly , and maintain a list of google's server
+# So, google may has some request uri judge, We
+# can only use self hosted dns server
+# to return google's server address randomly ,
+# and maintain a list of google's server
 # address in that dns server
 
-filt_scholar_configs = {'scihub_host':scihub_self}
-filt_scihub_configs = {'download_html':'download.html'}
+filt_scholar_configs = {'scihub_host': scihub_self}
+filt_scihub_configs = {'download_html': 'download.html'}
 
 util_log_level = logging.ERROR
-logger_level = logging.INFO #proxy.py's log
+logger_level = logging.INFO  #proxy.py's log
 gen_log_level = logging.ERROR
 access_log_level = logging.ERROR
 
