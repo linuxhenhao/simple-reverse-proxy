@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 from distutils.core import setup, Command
-from unittest import TextTestRunner, TestLoader
 import os
-import os.path
 
 
 class TestCommand(Command):
@@ -22,15 +20,15 @@ class TestCommand(Command):
 
 
 setup(
-    name='tornado-proxy',
-    version='0.1',
-    description='Simple asynchronous HTTP proxy',
-    url='http://senko.net/en/',
-    author='Senko Rasic',
-    author_email='senko.rasic@dobarkod.hr',
+    name='tornado-reverse-proxy',
+    version='1.0',
+    description='Simple asynchronous reverse proxy',
+    url='http://blog.huangyu.me/',
+    author='Yu Huang',
+    author_email='diwang90@gmail.com',
     cmdclass={
         'test': TestCommand
     },
-    install_requires=['tornado'],
-    packages=['tornado_proxy'],
+    install_requires=['tornado', 'beautifulsoup'],
+    packages=['tornado_reverse_proxy'],
 )
