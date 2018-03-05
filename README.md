@@ -19,7 +19,7 @@ for example:
 		('http:proxy.com', 'https:www.google.com'),
 		# url to domain
 		('http:proxy.com/just4show/', 'https:www.bing.com')
-			]
+			    ]
 ```
 
 the rule is constructed by proxy-target tuples, an element in tuple
@@ -52,7 +52,7 @@ the filt function configurations are stored in settings.py, a filter_patterns li
 			(r'.*\.google\.\w', 'tornaod_proxy.filter.google'),
 			...
 			...
-				]
+				      ]
 ```
 the first part is a regular expression about target real server's url 
 to determin which filter will be used.   
