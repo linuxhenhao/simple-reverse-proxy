@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-
+# https option
+https_enabled = False
 '''
-url_rules are constructed by 
+url_rules are constructed by
 (front end host description, target host description)
-tuples, the description string is constituted by colon delimited 
+tuples, the description string is constituted by colon delimited
 scheme and host string, eg "https:www.baidu.com".
 '''
 url_rules = [
@@ -21,6 +22,6 @@ self_resolve = {
         # 'abc.com': ['1.1.1.1', '2.2.2.2'],
         }
 
-# allow tornado.httpclient using ipv6 to fetch if ipv6 is 
+# allow tornado.httpclient using ipv6 to fetch if ipv6 is
 # available both in proxy host and target host
 allow_ipv6 = True
