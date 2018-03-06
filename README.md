@@ -1,6 +1,6 @@
 ## a simple reverse proxy based on tornado
 a simple python implemented reverse proxy, based on tornado.
-tornado.gen is used to make write asynchronous program in a 
+tornado.gen is used to make write asynchronous program in a
 synchronized way.
 
 
@@ -9,7 +9,7 @@ synchronized way.
 ### flexible url mapping
 
 the url_rules list in settings.py defines the url mapping,
-Both domain to domain or url to domain form are supported, 
+Both domain to domain or url to domain form are supported,
 though, the url has a restricted format.
 
 for example:
@@ -19,7 +19,7 @@ for example:
 		('http:proxy.com', 'https:www.google.com'),
 		# url to domain
 		('http:proxy.com/just4show/', 'https:www.bing.com')
-			    ]
+							]
 ```
 
 the rule is constructed by proxy-target tuples, an element in tuple
@@ -39,7 +39,7 @@ So, cookie domain convert should be carefully handed in a reverse proxy.
 
 ### filt ability
 When doing reverse proxy, some find-and-replace actions should always be taken,
-Such as some url replace actions to make sure the user can fetch the contents of 
+Such as some url replace actions to make sure the user can fetch the contents of
 mirrored sites through proxy server.
 
 Any other modifications can be put into the filt functions. Thus, the contents fetched
@@ -52,10 +52,10 @@ the filt function configurations are stored in settings.py, a filter_patterns li
 			(r'.*\.google\.\w', 'tornaod_proxy.filter.google'),
 			...
 			...
-				      ]
+										]
 ```
-the first part is a regular expression about target real server's url 
-to determin which filter will be used.   
+the first part is a regular expression about target real server's url
+to determin which filter will be used.
 the seconde part in the tuple is a dotted python path.
 the config in the above example set a google filter function in filter.py
  under the following directory structure:

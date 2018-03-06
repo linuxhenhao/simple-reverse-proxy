@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # https option
 https_enabled = False
+# if https enabled,
 '''
 url_rules are constructed by
 (front end host description, target host description)
@@ -25,3 +26,11 @@ self_resolve = {
 # allow tornado.httpclient using ipv6 to fetch if ipv6 is
 # available both in proxy host and target host
 allow_ipv6 = True
+
+'''
+filter_patterns: a django url_patterns like list, regular expression will be used
+to match which filter will be applied to that response
+'''
+filter_patterns = [
+            # (r'^scholar\.google\.\w+', 'tornado_proxy.filter.google'),
+                  ]
