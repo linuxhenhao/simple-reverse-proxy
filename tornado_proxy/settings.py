@@ -33,4 +33,4 @@ to match which filter will be applied to that response
 '''
 filter_patterns = [
             # (r'^scholar\.google\.\w+', 'tornado_proxy.filter.google'),
-                  ]
+            ]
